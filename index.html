@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Ninebot BLE</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #101114;
+      color: white;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 700px;
+      padding: 40px 0;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #999;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: #1a1c21;
+      border: 1px solid #2c3038;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: white;
+      color: black;
+      border: none;
+      border-radius: 12px;
+      padding: 13px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    .status {
+      margin-left: 12px;
+      color: #999;
+    }
+
+    .connected {
+      color: #4ade80;
+    }
+
+    .error {
+      color: #f87171;
+    }
+
+    pre {
+      background: #0b0c0f;
+      border-radius: 12px;
+      padding: 15px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      color: #bbb;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🛴 Ninebot BLE</h1>
+
+  <div class="subtitle">
+    Bluetooth scooter connection
+  </div>
+
+  <div class="card">
+
+    <button onclick="connectBluetooth()">
+      🔵 Scan for Scooter
+    </button>
+
+    <span id="status" class="status">
+      Ready
+    </span>
+
+  </div>
+
+  <div class="card">
+
+    <h2>Device</h2>
+
+    <p id="deviceName">
+      Not connected
+    </p>
+
+    <p id="deviceId">
+    </p>
+
+  </div>
+
+  <div class="card">
+
+    <h2>Bluetooth information</h2>
+
+    <pre id="output">
+Nothing discovered yet.
+    </pre>
+
+  </div>
+
+</div>
+
+
+<script>
+
+let device = null;
+
+
+// Change status text
+function setStatus(text, type = "") {
+
+  const status = document.getElementById("status");
+
+  status.textContent = text;
+
+  status.className = "status " + type;
+
+}
+
+
+// Connect to BLE device
+async function connectBluetooth() {
+
+  // Check browser support
+
+  if (!navigator.bluetooth) {
+
+    setStatus(
+      "Web Bluetooth isn't supported",
+      "error"
+    );
+
+    return;
+  }
+
+
+  try {
+
+    setStatus("Choose your scooter...");
+
+
+    // Ask browser to show nearby BLE devices
+
+    device = await navigator.bluetooth.requestDevice({
+
+      acceptAllDevices: true
+
+    });
+
+
+    // Show device name
+
+    document.getElementById(
+      "deviceName"
+    ).textContent =
+      device.name || "Unnamed device";
+
+
+    // Show browser-generated device ID
+
+    document.getElementById(
+      "deviceId"
+    ).textContent =
+      device.id || "";
+
+
+    setStatus("Connecting...");
+
+
+    // Connect to GATT
+
+    const server =
+      await device.gatt.connect();
+
+
+    setStatus(
+      "Connected!",
+      "connected"
+    );
+
+
+    document.getElementById(
+      "output"
+    ).textContent =
+      "BLE connection successful.\n\n" +
+      "Device: " +
+      (device.name || "Unnamed") +
+      "\n\n" +
+      "GATT server connected.";
+
+
+    // Detect disconnect
+
+    device.addEventListener(
+      "gattserverdisconnected",
+      () => {
+
+        setStatus(
+          "Disconnected",
+          "error"
+        );
+
+        document.getElementById(
+          "output"
+        ).textContent =
+          "The device disconnected.";
+
+      }
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    setStatus(
+      "Connection failed",
+      "error"
+    );
+
+    document.getElementById(
+      "output"
+    ).textContent =
+      error.toString();
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>
