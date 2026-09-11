@@ -1,66 +1,170 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Ninebot BLE</title>
+  <title>Ninebot Dashboard</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #101114;
-      color: white;
-      display: flex;
-      justify-content: center;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, #202632 0%, #101216 45%, #090a0d 100%);
+      color: #fff;
     }
 
     .container {
-      width: 90%;
-      max-width: 700px;
-      padding: 40px 0;
+      width: min(92%, 720px);
+      margin: auto;
+      padding: 35px 0 50px;
+    }
+
+    .header {
+      margin-bottom: 25px;
+    }
+
+    .brand {
+      font-size: 14px;
+      color: #8b95a7;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
     }
 
     h1 {
-      font-size: 36px;
-      margin-bottom: 5px;
+      font-size: 38px;
+      margin: 5px 0;
+      letter-spacing: -1px;
     }
 
     .subtitle {
-      color: #999;
-      margin-bottom: 30px;
+      color: #8b95a7;
+      font-size: 15px;
     }
 
     .card {
-      background: #1a1c21;
-      border: 1px solid #2c3038;
-      border-radius: 18px;
-      padding: 20px;
-      margin-bottom: 20px;
+      background: rgba(25, 28, 34, 0.9);
+      border: 1px solid #303640;
+      border-radius: 22px;
+      padding: 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 35px rgba(0,0,0,.2);
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .scooter-icon {
+      font-size: 55px;
+    }
+
+    .connection {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #6b7280;
+    }
+
+    .dot.connected {
+      background: #4ade80;
+      box-shadow: 0 0 12px #4ade80;
     }
 
     button {
-      background: white;
-      color: black;
+      width: 100%;
       border: none;
-      border-radius: 12px;
-      padding: 13px 20px;
+      border-radius: 15px;
+      padding: 16px;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 750;
       cursor: pointer;
+      background: white;
+      color: #090a0d;
+      transition: transform .15s, opacity .15s;
+    }
+
+    button:active {
+      transform: scale(.98);
     }
 
     button:hover {
-      opacity: 0.85;
+      opacity: .9;
     }
 
-    .status {
-      margin-left: 12px;
-      color: #999;
+    .disconnect {
+      background: #292e36;
+      color: white;
+      margin-top: 10px;
+      display: none;
     }
 
-    .connected {
+    .section-title {
+      font-size: 13px;
+      color: #8b95a7;
+      text-transform: uppercase;
+      letter-spacing: 1.3px;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .device-name {
+      font-size: 23px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      word-break: break-word;
+    }
+
+    .device-id {
+      color: #717b8d;
+      font-size: 12px;
+      word-break: break-all;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .stat {
+      background: #111419;
+      border: 1px solid #282d35;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .stat-label {
+      color: #858e9e;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 21px;
+      font-weight: 700;
+    }
+
+    .success {
       color: #4ade80;
     }
 
@@ -68,13 +172,46 @@
       color: #f87171;
     }
 
+    .warning {
+      color: #fbbf24;
+    }
+
     pre {
-      background: #0b0c0f;
-      border-radius: 12px;
+      margin: 0;
+      background: #090b0e;
+      border: 1px solid #252a32;
+      border-radius: 14px;
       padding: 15px;
+      color: #aeb7c6;
+      font-size: 12px;
+      line-height: 1.6;
       white-space: pre-wrap;
       overflow-x: auto;
-      color: #bbb;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+
+    .empty {
+      color: #687181;
+      font-size: 14px;
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        padding-top: 25px;
+      }
+
+      h1 {
+        font-size: 31px;
+      }
+
+      .scooter-icon {
+        font-size: 45px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -83,44 +220,115 @@
 
 <div class="container">
 
-  <h1>🛴 Ninebot BLE</h1>
+  <div class="header">
+    <div class="brand">Ninebot BLE</div>
+    <h1>🛴 Scooter Dashboard</h1>
+    <div class="subtitle">
+      Bluetooth diagnostics & connection
+    </div>
+  </div>
 
-  <div class="subtitle">
-    Bluetooth scooter connection
+  <div class="card hero">
+    <div>
+      <div class="connection">
+        <span id="connectionDot" class="dot"></span>
+        <span id="status">Ready to connect</span>
+      </div>
+    </div>
+
+    <div class="scooter-icon">
+      🛴
+    </div>
   </div>
 
   <div class="card">
 
-    <button onclick="connectBluetooth()">
-      🔵 Scan for Scooter
+    <button id="connectButton" onclick="connectBluetooth()">
+      🔵 Connect Scooter
     </button>
 
-    <span id="status" class="status">
-      Ready
-    </span>
+    <button
+      id="disconnectButton"
+      class="disconnect"
+      onclick="disconnectBluetooth()">
+      Disconnect
+    </button>
 
   </div>
 
   <div class="card">
 
-    <h2>Device</h2>
+    <div class="section-title">
+      Scooter
+    </div>
 
-    <p id="deviceName">
+    <div id="deviceName" class="device-name">
       Not connected
-    </p>
+    </div>
 
-    <p id="deviceId">
-    </p>
+    <div id="deviceId" class="device-id"></div>
 
   </div>
 
   <div class="card">
 
-    <h2>Bluetooth information</h2>
+    <div class="section-title">
+      Connection
+    </div>
 
-    <pre id="output">
-Nothing discovered yet.
-    </pre>
+    <div class="stats">
+
+      <div class="stat">
+        <div class="stat-label">
+          Bluetooth
+        </div>
+
+        <div id="bluetoothStatus" class="stat-value">
+          Offline
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">
+          GATT
+        </div>
+
+        <div id="gattStatus" class="stat-value">
+          Offline
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">
+          Services
+        </div>
+
+        <div id="serviceCount" class="stat-value">
+          —
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">
+          Characteristics
+        </div>
+
+        <div id="characteristicCount" class="stat-value">
+          —
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <div class="section-title">
+      Bluetooth diagnostics
+    </div>
+
+    <pre id="output">Nothing discovered yet.</pre>
 
   </div>
 
@@ -130,30 +338,59 @@ Nothing discovered yet.
 <script>
 
 let device = null;
+let server = null;
 
 
-// Change status text
+// -------------------------
+// UI helpers
+// -------------------------
+
 function setStatus(text, type = "") {
 
   const status = document.getElementById("status");
+  const dot = document.getElementById("connectionDot");
 
   status.textContent = text;
 
-  status.className = "status " + type;
+  dot.className = "dot";
 
+  if (type === "connected") {
+    dot.classList.add("connected");
+    status.className = "success";
+  }
+  else if (type === "error") {
+    status.className = "error";
+  }
+  else if (type === "warning") {
+    status.className = "warning";
+  }
+  else {
+    status.className = "";
+  }
 }
 
 
-// Connect to BLE device
-async function connectBluetooth() {
+function log(text) {
+  document.getElementById("output").textContent = text;
+}
 
-  // Check browser support
+
+// -------------------------
+// Connect
+// -------------------------
+
+async function connectBluetooth() {
 
   if (!navigator.bluetooth) {
 
     setStatus(
-      "Web Bluetooth isn't supported",
+      "Web Bluetooth not supported",
       "error"
+    );
+
+    log(
+      "This browser does not support Web Bluetooth.\n\n" +
+      "On iPhone, open this website using a Web-Bluetooth-compatible browser such as Bluefy."
     );
 
     return;
@@ -163,79 +400,62 @@ async function connectBluetooth() {
   try {
 
     setStatus("Choose your scooter...");
+    log("Waiting for Bluetooth device selection...");
 
-
-    // Ask browser to show nearby BLE devices
 
     device = await navigator.bluetooth.requestDevice({
-
       acceptAllDevices: true
-
     });
 
 
-    // Show device name
-
-    document.getElementById(
-      "deviceName"
-    ).textContent =
+    document.getElementById("deviceName").textContent =
       device.name || "Unnamed device";
 
-
-    // Show browser-generated device ID
-
-    document.getElementById(
-      "deviceId"
-    ).textContent =
+    document.getElementById("deviceId").textContent =
       device.id || "";
+
+
+    document.getElementById("bluetoothStatus").textContent =
+      "Selected";
+
+    document.getElementById("bluetoothStatus").className =
+      "stat-value success";
 
 
     setStatus("Connecting...");
 
 
-    // Connect to GATT
-
-    const server =
-      await device.gatt.connect();
+    server = await device.gatt.connect();
 
 
-    setStatus(
-      "Connected!",
-      "connected"
-    );
+    setStatus("Connected", "connected");
 
 
-    document.getElementById(
-      "output"
-    ).textContent =
-      "BLE connection successful.\n\n" +
-      "Device: " +
-      (device.name || "Unnamed") +
-      "\n\n" +
-      "GATT server connected.";
+    document.getElementById("gattStatus").textContent =
+      "Connected";
+
+    document.getElementById("gattStatus").className =
+      "stat-value success";
 
 
-    // Detect disconnect
+    document.getElementById("connectButton").style.display =
+      "none";
+
+    document.getElementById("disconnectButton").style.display =
+      "block";
+
+
+    await discoverServices();
+
 
     device.addEventListener(
       "gattserverdisconnected",
-      () => {
-
-        setStatus(
-          "Disconnected",
-          "error"
-        );
-
-        document.getElementById(
-          "output"
-        ).textContent =
-          "The device disconnected.";
-
-      }
+      handleDisconnect
     );
 
+  }
 
-  } catch (error) {
+  catch (error) {
 
     console.error(error);
 
@@ -244,16 +464,189 @@ async function connectBluetooth() {
       "error"
     );
 
-    document.getElementById(
-      "output"
-    ).textContent =
-      error.toString();
+    document.getElementById("bluetoothStatus").textContent =
+      "Failed";
+
+    document.getElementById("bluetoothStatus").className =
+      "stat-value error";
+
+    log(
+      "Error:\n\n" +
+      error.name +
+      "\n" +
+      error.message
+    );
+
+  }
+}
+
+
+// -------------------------
+// Discover GATT services
+// -------------------------
+
+async function discoverServices() {
+
+  try {
+
+    log("Discovering Bluetooth services...");
+
+
+    const services =
+      await server.getPrimaryServices();
+
+
+    let output =
+      "GATT connection successful.\n\n";
+
+    output +=
+      "PRIMARY SERVICES\n";
+    output +=
+      "================\n\n";
+
+
+    let characteristicTotal = 0;
+
+
+    for (const service of services) {
+
+      output +=
+        "Service:\n" +
+        service.uuid +
+        "\n";
+
+
+      try {
+
+        const characteristics =
+          await service.getCharacteristics();
+
+
+        characteristicTotal +=
+          characteristics.length;
+
+
+        for (const characteristic of characteristics) {
+
+          output +=
+            "  └─ Characteristic:\n" +
+            "     " +
+            characteristic.uuid +
+            "\n";
+
+          output +=
+            "     Properties: " +
+            getProperties(characteristic) +
+            "\n\n";
+        }
+
+      }
+
+      catch (error) {
+
+        output +=
+          "  Could not read characteristics.\n\n";
+      }
+    }
+
+
+    document.getElementById("serviceCount").textContent =
+      services.length;
+
+    document.getElementById("characteristicCount").textContent =
+      characteristicTotal;
+
+
+    log(output);
 
   }
 
+  catch (error) {
+
+    console.error(error);
+
+    log(
+      "Connected, but service discovery failed.\n\n" +
+      error.name +
+      "\n" +
+      error.message
+    );
+
+  }
+}
+
+
+// -------------------------
+// Characteristic properties
+// -------------------------
+
+function getProperties(characteristic) {
+
+  const properties = [];
+
+  if (characteristic.properties.read)
+    properties.push("READ");
+
+  if (characteristic.properties.write)
+    properties.push("WRITE");
+
+  if (characteristic.properties.writeWithoutResponse)
+    properties.push("WRITE WITHOUT RESPONSE");
+
+  if (characteristic.properties.notify)
+    properties.push("NOTIFY");
+
+  if (characteristic.properties.indicate)
+    properties.push("INDICATE");
+
+  return properties.join(", ") || "NONE";
+}
+
+
+// -------------------------
+// Disconnect
+// -------------------------
+
+function disconnectBluetooth() {
+
+  if (device && device.gatt.connected) {
+    device.gatt.disconnect();
+  }
+
+  handleDisconnect();
+}
+
+
+function handleDisconnect() {
+
+  setStatus(
+    "Disconnected",
+    "error"
+  );
+
+  document.getElementById("bluetoothStatus").textContent =
+    "Offline";
+
+  document.getElementById("bluetoothStatus").className =
+    "stat-value";
+
+  document.getElementById("gattStatus").textContent =
+    "Offline";
+
+  document.getElementById("gattStatus").className =
+    "stat-value";
+
+  document.getElementById("connectButton").style.display =
+    "block";
+
+  document.getElementById("disconnectButton").style.display =
+    "none";
+
+  log("The scooter disconnected.");
 }
 
 </script>
 
 </body>
 </html>
+```
