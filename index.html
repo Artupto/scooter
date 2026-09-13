@@ -1,219 +1,231 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Ninebot Dashboard</title>
+<title>Ninebot BLE Dashboard</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background:
-        radial-gradient(circle at top, #202632 0%, #101216 45%, #090a0d 100%);
-      color: #fff;
-    }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, #202832 0%, #0e1014 45%, #08090b 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
 
-    .container {
-      width: min(92%, 720px);
-      margin: auto;
-      padding: 35px 0 50px;
-    }
+.container {
+  width: min(94%, 760px);
+  margin: auto;
+  padding: 28px 0 50px;
+}
 
-    .header {
-      margin-bottom: 25px;
-    }
+.header {
+  margin-bottom: 20px;
+}
 
-    .brand {
-      font-size: 14px;
-      color: #8b95a7;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-weight: 700;
-    }
+.brand {
+  color: #8b95a7;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
 
-    h1 {
-      font-size: 38px;
-      margin: 5px 0;
-      letter-spacing: -1px;
-    }
+h1 {
+  margin: 5px 0;
+  font-size: 34px;
+}
 
-    .subtitle {
-      color: #8b95a7;
-      font-size: 15px;
-    }
+.subtitle {
+  color: #8b95a7;
+  font-size: 14px;
+}
 
-    .card {
-      background: rgba(25, 28, 34, 0.9);
-      border: 1px solid #303640;
-      border-radius: 22px;
-      padding: 22px;
-      margin-bottom: 16px;
-      box-shadow: 0 10px 35px rgba(0,0,0,.2);
-    }
+.card {
+  background: rgba(24, 27, 33, .94);
+  border: 1px solid #303640;
+  border-radius: 22px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 12px 35px rgba(0,0,0,.22);
+}
 
-    .hero {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-    }
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-    .scooter-icon {
-      font-size: 55px;
-    }
+.scooter {
+  font-size: 55px;
+}
 
-    .connection {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      color: #9ca3af;
-      font-size: 14px;
-    }
+.connection {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #9ca3af;
+}
 
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #6b7280;
-    }
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #6b7280;
+}
 
-    .dot.connected {
-      background: #4ade80;
-      box-shadow: 0 0 12px #4ade80;
-    }
+.dot.connected {
+  background: #4ade80;
+  box-shadow: 0 0 12px #4ade80;
+}
 
-    button {
-      width: 100%;
-      border: none;
-      border-radius: 15px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 750;
-      cursor: pointer;
-      background: white;
-      color: #090a0d;
-      transition: transform .15s, opacity .15s;
-    }
+.dot.error {
+  background: #f87171;
+}
 
-    button:active {
-      transform: scale(.98);
-    }
+button {
+  width: 100%;
+  border: 0;
+  border-radius: 15px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 750;
+  cursor: pointer;
+  background: white;
+  color: #090a0d;
+  margin-bottom: 10px;
+}
 
-    button:hover {
-      opacity: .9;
-    }
+button:active {
+  transform: scale(.98);
+}
 
-    .disconnect {
-      background: #292e36;
-      color: white;
-      margin-top: 10px;
-      display: none;
-    }
+button.secondary {
+  background: #292e36;
+  color: white;
+}
 
-    .section-title {
-      font-size: 13px;
-      color: #8b95a7;
-      text-transform: uppercase;
-      letter-spacing: 1.3px;
-      margin-bottom: 14px;
-      font-weight: 700;
-    }
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
 
-    .device-name {
-      font-size: 23px;
-      font-weight: 700;
-      margin-bottom: 5px;
-      word-break: break-word;
-    }
+.section-title {
+  color: #8b95a7;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  margin-bottom: 13px;
+}
 
-    .device-id {
-      color: #717b8d;
-      font-size: 12px;
-      word-break: break-all;
-    }
+.device-name {
+  font-size: 22px;
+  font-weight: 750;
+  word-break: break-word;
+}
 
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
+.device-id {
+  color: #717b8d;
+  font-size: 12px;
+  margin-top: 5px;
+  word-break: break-all;
+}
 
-    .stat {
-      background: #111419;
-      border: 1px solid #282d35;
-      border-radius: 16px;
-      padding: 18px;
-    }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
 
-    .stat-label {
-      color: #858e9e;
-      font-size: 13px;
-      margin-bottom: 8px;
-    }
+.stat {
+  background: #111419;
+  border: 1px solid #282d35;
+  border-radius: 15px;
+  padding: 16px;
+}
 
-    .stat-value {
-      font-size: 21px;
-      font-weight: 700;
-    }
+.label {
+  color: #858e9e;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
 
-    .success {
-      color: #4ade80;
-    }
+.value {
+  font-size: 18px;
+  font-weight: 700;
+}
 
-    .error {
-      color: #f87171;
-    }
+.green {
+  color: #4ade80;
+}
 
-    .warning {
-      color: #fbbf24;
-    }
+.yellow {
+  color: #fbbf24;
+}
 
-    pre {
-      margin: 0;
-      background: #090b0e;
-      border: 1px solid #252a32;
-      border-radius: 14px;
-      padding: 15px;
-      color: #aeb7c6;
-      font-size: 12px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      overflow-x: auto;
-      max-height: 350px;
-      overflow-y: auto;
-    }
+.red {
+  color: #f87171;
+}
 
-    .empty {
-      color: #687181;
-      font-size: 14px;
-    }
+pre {
+  margin: 0;
+  background: #080a0d;
+  border: 1px solid #252a32;
+  border-radius: 14px;
+  padding: 15px;
+  color: #b7c0ce;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 420px;
+  overflow-y: auto;
+}
 
-    @media (max-width: 500px) {
-      .container {
-        padding-top: 25px;
-      }
+.notice {
+  color: #8b95a7;
+  font-size: 13px;
+  line-height: 1.5;
+}
 
-      h1 {
-        font-size: 31px;
-      }
+.uuid {
+  font-family: monospace;
+  font-size: 12px;
+  color: #b7c0ce;
+  word-break: break-all;
+  background: #101318;
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 8px;
+}
 
-      .scooter-icon {
-        font-size: 45px;
-      }
+.hidden {
+  display: none;
+}
 
-      .stats {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+@media(max-width:500px) {
+  .container {
+    padding-top: 22px;
+  }
+
+  h1 {
+    font-size: 29px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
 </head>
 
 <body>
@@ -224,38 +236,58 @@
     <div class="brand">Ninebot BLE</div>
     <h1>🛴 Scooter Dashboard</h1>
     <div class="subtitle">
-      Bluetooth diagnostics & connection
+      BLE connection & diagnostics
     </div>
   </div>
 
+
+  <!-- CONNECTION -->
   <div class="card hero">
+
     <div>
       <div class="connection">
-        <span id="connectionDot" class="dot"></span>
-        <span id="status">Ready to connect</span>
+        <span id="dot" class="dot"></span>
+        <span id="status">Ready</span>
       </div>
     </div>
 
-    <div class="scooter-icon">
-      🛴
-    </div>
+    <div class="scooter">🛴</div>
+
   </div>
 
+
+  <!-- BUTTONS -->
   <div class="card">
 
-    <button id="connectButton" onclick="connectBluetooth()">
+    <button id="connectButton" onclick="connectScooter()">
       🔵 Connect Scooter
     </button>
 
     <button
       id="disconnectButton"
-      class="disconnect"
-      onclick="disconnectBluetooth()">
+      class="secondary hidden"
+      onclick="disconnectScooter()">
       Disconnect
+    </button>
+
+    <button
+      id="clearButton"
+      class="secondary"
+      onclick="clearLog()">
+      Clear diagnostics
+    </button>
+
+    <button
+      id="copyButton"
+      class="secondary"
+      onclick="copyLog()">
+      Copy diagnostics
     </button>
 
   </div>
 
+
+  <!-- DEVICE -->
   <div class="card">
 
     <div class="section-title">
@@ -270,6 +302,8 @@
 
   </div>
 
+
+  <!-- STATUS -->
   <div class="card">
 
     <div class="section-title">
@@ -279,56 +313,105 @@
     <div class="stats">
 
       <div class="stat">
-        <div class="stat-label">
-          Bluetooth
-        </div>
-
-        <div id="bluetoothStatus" class="stat-value">
-          Offline
-        </div>
+        <div class="label">Bluetooth</div>
+        <div id="bluetoothStatus" class="value">Offline</div>
       </div>
 
       <div class="stat">
-        <div class="stat-label">
-          GATT
-        </div>
-
-        <div id="gattStatus" class="stat-value">
-          Offline
-        </div>
+        <div class="label">GATT</div>
+        <div id="gattStatus" class="value">Offline</div>
       </div>
 
       <div class="stat">
-        <div class="stat-label">
-          Services
-        </div>
-
-        <div id="serviceCount" class="stat-value">
-          —
-        </div>
+        <div class="label">Services</div>
+        <div id="serviceCount" class="value">—</div>
       </div>
 
       <div class="stat">
-        <div class="stat-label">
-          Characteristics
-        </div>
+        <div class="label">Characteristics</div>
+        <div id="characteristicCount" class="value">—</div>
+      </div>
 
-        <div id="characteristicCount" class="stat-value">
-          —
-        </div>
+      <div class="stat">
+        <div class="label">Notifications</div>
+        <div id="notificationStatus" class="value">Off</div>
+      </div>
+
+      <div class="stat">
+        <div class="label">Packets received</div>
+        <div id="packetCount" class="value">0</div>
       </div>
 
     </div>
 
   </div>
 
+
+  <!-- KNOWN BLE INTERFACE -->
+  <div class="card">
+
+    <div class="section-title">
+      Detected BLE interface
+    </div>
+
+    <div class="notice">
+      The interface discovered from your scooter.
+    </div>
+
+    <div class="uuid">
+      Service<br>
+      86531001-43E6-47B7-9CB0-5FC21D4AE340
+    </div>
+
+    <div class="uuid">
+      Notify<br>
+      86531003-43E6-47B7-9CB0-5FC21D4AE340
+    </div>
+
+    <div class="uuid">
+      Write<br>
+      86531002-43E6-47B7-9CB0-5FC21D4AE340
+    </div>
+
+  </div>
+
+
+  <!-- LIVE DATA -->
+  <div class="card">
+
+    <div class="section-title">
+      Live BLE data
+    </div>
+
+    <pre id="liveData">Waiting for notifications...</pre>
+
+  </div>
+
+
+  <!-- FULL LOG -->
   <div class="card">
 
     <div class="section-title">
       Bluetooth diagnostics
     </div>
 
-    <pre id="output">Nothing discovered yet.</pre>
+    <pre id="diagnostics">Nothing discovered yet.</pre>
+
+  </div>
+
+
+  <!-- SAFETY INFO -->
+  <div class="card">
+
+    <div class="section-title">
+      About
+    </div>
+
+    <div class="notice">
+      This dashboard listens to the scooter's notification channel
+      and displays the data received from it. It does not send
+      unknown commands to the scooter.
+    </div>
 
   </div>
 
@@ -337,18 +420,53 @@
 
 <script>
 
+/*
+==================================================
+KNOWN NINEBOT BLE UUIDs
+==================================================
+*/
+
+const SERVICE_UUID =
+  "86531001-43E6-47B7-9CB0-5FC21D4AE340";
+
+const NOTIFY_UUID =
+  "86531003-43E6-47B7-9CB0-5FC21D4AE340";
+
+const WRITE_UUID =
+  "86531002-43E6-47B7-9CB0-5FC21D4AE340";
+
+
+/*
+==================================================
+GLOBAL VARIABLES
+==================================================
+*/
+
 let device = null;
 let server = null;
+let service = null;
+
+let notifyCharacteristic = null;
+let writeCharacteristic = null;
+
+let packetCount = 0;
+
+let diagnosticLines = [];
 
 
-// -------------------------
-// UI helpers
-// -------------------------
+/*
+==================================================
+UI
+==================================================
+*/
 
 function setStatus(text, type = "") {
 
-  const status = document.getElementById("status");
-  const dot = document.getElementById("connectionDot");
+  const status =
+    document.getElementById("status");
+
+  const dot =
+    document.getElementById("dot");
 
   status.textContent = text;
 
@@ -356,41 +474,198 @@ function setStatus(text, type = "") {
 
   if (type === "connected") {
     dot.classList.add("connected");
-    status.className = "success";
   }
-  else if (type === "error") {
-    status.className = "error";
-  }
-  else if (type === "warning") {
-    status.className = "warning";
-  }
-  else {
-    status.className = "";
+
+  if (type === "error") {
+    dot.classList.add("error");
   }
 }
 
+
+function setValue(id, text, className = "") {
+
+  const element =
+    document.getElementById(id);
+
+  element.textContent = text;
+
+  element.className =
+    "value " + className;
+}
+
+
+/*
+==================================================
+LOGGING
+==================================================
+*/
 
 function log(text) {
-  document.getElementById("output").textContent = text;
+
+  diagnosticLines.push(text);
+
+  document.getElementById(
+    "diagnostics"
+  ).textContent =
+    diagnosticLines.join("\n\n");
 }
 
 
-// -------------------------
-// Connect
-// -------------------------
+function clearLog() {
 
-async function connectBluetooth() {
+  diagnosticLines = [];
+
+  document.getElementById(
+    "diagnostics"
+  ).textContent =
+    "Diagnostics cleared.";
+
+  document.getElementById(
+    "liveData"
+  ).textContent =
+    "Waiting for notifications...";
+}
+
+
+async function copyLog() {
+
+  const text =
+    diagnosticLines.join("\n\n");
+
+  try {
+
+    await navigator.clipboard.writeText(text);
+
+    setStatus("Diagnostics copied");
+
+  } catch {
+
+    setStatus(
+      "Could not copy diagnostics",
+      "error"
+    );
+  }
+}
+
+
+/*
+==================================================
+BYTE CONVERSION
+==================================================
+*/
+
+function bytesToHex(dataView) {
+
+  const bytes = new Uint8Array(
+    dataView.buffer,
+    dataView.byteOffset,
+    dataView.byteLength
+  );
+
+  return Array.from(bytes)
+    .map(
+      byte =>
+        byte.toString(16).padStart(2, "0").toUpperCase()
+    )
+    .join(" ");
+}
+
+
+function bytesToAscii(dataView) {
+
+  const bytes = new Uint8Array(
+    dataView.buffer,
+    dataView.byteOffset,
+    dataView.byteLength
+  );
+
+  return Array.from(bytes)
+    .map(byte => {
+
+      if (
+        byte >= 32 &&
+        byte <= 126
+      ) {
+        return String.fromCharCode(byte);
+      }
+
+      return ".";
+
+    })
+    .join("");
+}
+
+
+/*
+==================================================
+NOTIFICATION HANDLER
+==================================================
+*/
+
+function handleNotification(event) {
+
+  const value =
+    event.target.value;
+
+  packetCount++;
+
+  document.getElementById(
+    "packetCount"
+  ).textContent =
+    packetCount;
+
+
+  const hex =
+    bytesToHex(value);
+
+  const ascii =
+    bytesToAscii(value);
+
+
+  const timestamp =
+    new Date().toLocaleTimeString();
+
+
+  const packet =
+    `[${timestamp}]
+HEX:
+${hex}
+
+ASCII:
+${ascii}`;
+
+
+  document.getElementById(
+    "liveData"
+  ).textContent =
+    packet;
+
+
+  log(
+    "NOTIFICATION RECEIVED\n" +
+    packet
+  );
+}
+
+
+/*
+==================================================
+CONNECT
+==================================================
+*/
+
+async function connectScooter() {
 
   if (!navigator.bluetooth) {
 
     setStatus(
-      "Web Bluetooth not supported",
+      "Web Bluetooth unavailable",
       "error"
     );
 
     log(
-      "This browser does not support Web Bluetooth.\n\n" +
-      "On iPhone, open this website using a Web-Bluetooth-compatible browser such as Bluefy."
+      "ERROR\n" +
+      "This browser does not expose Web Bluetooth."
     );
 
     return;
@@ -399,79 +674,222 @@ async function connectBluetooth() {
 
   try {
 
-    setStatus("Choose your scooter...");
-    log("Waiting for Bluetooth device selection...");
+    setStatus(
+      "Choose your scooter..."
+    );
 
 
-    device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true
-    });
+    /*
+    We use acceptAllDevices because the
+    service UUID is vendor-specific.
+    */
+
+    device =
+      await navigator.bluetooth.requestDevice({
+
+        acceptAllDevices: true,
+
+        optionalServices: [
+          SERVICE_UUID
+        ]
+
+      });
 
 
-    document.getElementById("deviceName").textContent =
-      device.name || "Unnamed device";
+    document.getElementById(
+      "deviceName"
+    ).textContent =
+      device.name ||
+      "Unnamed scooter";
 
-    document.getElementById("deviceId").textContent =
+
+    document.getElementById(
+      "deviceId"
+    ).textContent =
       device.id || "";
 
 
-    document.getElementById("bluetoothStatus").textContent =
-      "Selected";
-
-    document.getElementById("bluetoothStatus").className =
-      "stat-value success";
-
-
-    setStatus("Connecting...");
+    setValue(
+      "bluetoothStatus",
+      "Selected",
+      "yellow"
+    );
 
 
-    server = await device.gatt.connect();
+    setStatus(
+      "Connecting..."
+    );
 
 
-    setStatus("Connected", "connected");
+    server =
+      await device.gatt.connect();
 
 
-    document.getElementById("gattStatus").textContent =
-      "Connected";
-
-    document.getElementById("gattStatus").className =
-      "stat-value success";
-
-
-    document.getElementById("connectButton").style.display =
-      "none";
-
-    document.getElementById("disconnectButton").style.display =
-      "block";
+    setValue(
+      "gattStatus",
+      "Connected",
+      "green"
+    );
 
 
-    await discoverServices();
+    setStatus(
+      "Connected",
+      "connected"
+    );
 
+
+    document.getElementById(
+      "connectButton"
+    ).classList.add("hidden");
+
+
+    document.getElementById(
+      "disconnectButton"
+    ).classList.remove("hidden");
+
+
+    log(
+      "GATT CONNECTION SUCCESSFUL"
+    );
+
+
+    /*
+    Get the known service.
+    */
+
+    service =
+      await server.getPrimaryService(
+        SERVICE_UUID
+      );
+
+
+    log(
+      "SERVICE FOUND\n" +
+      SERVICE_UUID
+    );
+
+
+    /*
+    Get all characteristics.
+    */
+
+    const characteristics =
+      await service.getCharacteristics();
+
+
+    setValue(
+      "serviceCount",
+      "1"
+    );
+
+
+    setValue(
+      "characteristicCount",
+      characteristics.length
+    );
+
+
+    log(
+      "CHARACTERISTICS FOUND\n" +
+      "Count: " +
+      characteristics.length
+    );
+
+
+    /*
+    Find the notification characteristic.
+    */
+
+    notifyCharacteristic =
+      await service.getCharacteristic(
+        NOTIFY_UUID
+      );
+
+
+    log(
+      "NOTIFY CHARACTERISTIC FOUND\n" +
+      NOTIFY_UUID
+    );
+
+
+    /*
+    Start notifications.
+    */
+
+    notifyCharacteristic.addEventListener(
+      "characteristicvaluechanged",
+      handleNotification
+    );
+
+
+    await notifyCharacteristic.startNotifications();
+
+
+    setValue(
+      "notificationStatus",
+      "Active",
+      "green"
+    );
+
+
+    log(
+      "NOTIFICATIONS ACTIVE\n" +
+      "Listening for scooter data..."
+    );
+
+
+    /*
+    Find the writable characteristic,
+    but DO NOT send anything to it.
+    */
+
+    writeCharacteristic =
+      await service.getCharacteristic(
+        WRITE_UUID
+      );
+
+
+    log(
+      "WRITE CHARACTERISTIC FOUND\n" +
+      WRITE_UUID +
+      "\n\n" +
+      "Properties:\n" +
+      getProperties(writeCharacteristic) +
+      "\n\n" +
+      "No data has been written."
+    );
+
+
+    /*
+    Handle disconnects.
+    */
 
     device.addEventListener(
       "gattserverdisconnected",
       handleDisconnect
     );
 
-  }
 
-  catch (error) {
+  } catch(error) {
 
     console.error(error);
+
 
     setStatus(
       "Connection failed",
       "error"
     );
 
-    document.getElementById("bluetoothStatus").textContent =
-      "Failed";
 
-    document.getElementById("bluetoothStatus").className =
-      "stat-value error";
+    setValue(
+      "gattStatus",
+      "Failed",
+      "red"
+    );
+
 
     log(
-      "Error:\n\n" +
+      "ERROR\n\n" +
       error.name +
       "\n" +
       error.message
@@ -481,104 +899,11 @@ async function connectBluetooth() {
 }
 
 
-// -------------------------
-// Discover GATT services
-// -------------------------
-
-async function discoverServices() {
-
-  try {
-
-    log("Discovering Bluetooth services...");
-
-
-    const services =
-      await server.getPrimaryServices();
-
-
-    let output =
-      "GATT connection successful.\n\n";
-
-    output +=
-      "PRIMARY SERVICES\n";
-    output +=
-      "================\n\n";
-
-
-    let characteristicTotal = 0;
-
-
-    for (const service of services) {
-
-      output +=
-        "Service:\n" +
-        service.uuid +
-        "\n";
-
-
-      try {
-
-        const characteristics =
-          await service.getCharacteristics();
-
-
-        characteristicTotal +=
-          characteristics.length;
-
-
-        for (const characteristic of characteristics) {
-
-          output +=
-            "  └─ Characteristic:\n" +
-            "     " +
-            characteristic.uuid +
-            "\n";
-
-          output +=
-            "     Properties: " +
-            getProperties(characteristic) +
-            "\n\n";
-        }
-
-      }
-
-      catch (error) {
-
-        output +=
-          "  Could not read characteristics.\n\n";
-      }
-    }
-
-
-    document.getElementById("serviceCount").textContent =
-      services.length;
-
-    document.getElementById("characteristicCount").textContent =
-      characteristicTotal;
-
-
-    log(output);
-
-  }
-
-  catch (error) {
-
-    console.error(error);
-
-    log(
-      "Connected, but service discovery failed.\n\n" +
-      error.name +
-      "\n" +
-      error.message
-    );
-
-  }
-}
-
-
-// -------------------------
-// Characteristic properties
-// -------------------------
+/*
+==================================================
+CHARACTERISTIC PROPERTIES
+==================================================
+*/
 
 function getProperties(characteristic) {
 
@@ -603,17 +928,44 @@ function getProperties(characteristic) {
 }
 
 
-// -------------------------
-// Disconnect
-// -------------------------
+/*
+==================================================
+DISCONNECT
+==================================================
+*/
 
-function disconnectBluetooth() {
+function disconnectScooter() {
 
-  if (device && device.gatt.connected) {
+  try {
+
+    if (
+      notifyCharacteristic &&
+      notifyCharacteristic.service.device &&
+      device &&
+      device.gatt.connected
+    ) {
+
+      notifyCharacteristic
+        .stopNotifications()
+        .catch(() => {});
+
+    }
+
+  } catch {}
+
+  if (
+    device &&
+    device.gatt &&
+    device.gatt.connected
+  ) {
+
     device.gatt.disconnect();
-  }
 
-  handleDisconnect();
+  } else {
+
+    handleDisconnect();
+
+  }
 }
 
 
@@ -624,29 +976,70 @@ function handleDisconnect() {
     "error"
   );
 
-  document.getElementById("bluetoothStatus").textContent =
-    "Offline";
 
-  document.getElementById("bluetoothStatus").className =
-    "stat-value";
+  setValue(
+    "bluetoothStatus",
+    "Offline"
+  );
 
-  document.getElementById("gattStatus").textContent =
-    "Offline";
 
-  document.getElementById("gattStatus").className =
-    "stat-value";
+  setValue(
+    "gattStatus",
+    "Offline"
+  );
 
-  document.getElementById("connectButton").style.display =
-    "block";
 
-  document.getElementById("disconnectButton").style.display =
-    "none";
+  setValue(
+    "notificationStatus",
+    "Off"
+  );
 
-  log("The scooter disconnected.");
+
+  document.getElementById(
+    "connectButton"
+  ).classList.remove("hidden");
+
+
+  document.getElementById(
+    "disconnectButton"
+  ).classList.add("hidden");
+
+
+  document.getElementById(
+    "liveData"
+  ).textContent =
+    "Waiting for notifications...";
+
+
+  log(
+    "SCOOTER DISCONNECTED"
+  );
+
+
+  notifyCharacteristic = null;
+  writeCharacteristic = null;
+  service = null;
+  server = null;
 }
+
+
+/*
+==================================================
+INITIAL STATE
+==================================================
+*/
+
+setValue(
+  "serviceCount",
+  "—"
+);
+
+setValue(
+  "characteristicCount",
+  "—"
+);
 
 </script>
 
 </body>
 </html>
-```
