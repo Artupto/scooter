@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -7,9 +8,7 @@
 <title>Ninebot BLE Dashboard</title>
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -26,9 +25,7 @@ body {
   padding: 28px 0 50px;
 }
 
-.header {
-  margin-bottom: 20px;
-}
+.header { margin-bottom: 20px; }
 
 .brand {
   color: #8b95a7;
@@ -63,9 +60,7 @@ h1 {
   align-items: center;
 }
 
-.scooter {
-  font-size: 55px;
-}
+.scooter { font-size: 55px; }
 
 .connection {
   display: flex;
@@ -86,9 +81,7 @@ h1 {
   box-shadow: 0 0 12px #4ade80;
 }
 
-.dot.error {
-  background: #f87171;
-}
+.dot.error { background: #f87171; }
 
 button {
   width: 100%;
@@ -103,13 +96,21 @@ button {
   margin-bottom: 10px;
 }
 
-button:active {
-  transform: scale(.98);
-}
+button:active { transform: scale(.98); }
 
 button.secondary {
   background: #292e36;
   color: white;
+}
+
+button.lock {
+  background: #f87171;
+  color: white;
+}
+
+button.unlock {
+  background: #4ade80;
+  color: #07120b;
 }
 
 button:disabled {
@@ -163,17 +164,9 @@ button:disabled {
   font-weight: 700;
 }
 
-.green {
-  color: #4ade80;
-}
-
-.yellow {
-  color: #fbbf24;
-}
-
-.red {
-  color: #f87171;
-}
+.green { color: #4ade80; }
+.yellow { color: #fbbf24; }
+.red { color: #f87171; }
 
 pre {
   margin: 0;
@@ -208,24 +201,38 @@ pre {
   margin-top: 8px;
 }
 
-.hidden {
-  display: none;
+.test-frame {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #101318;
+  border: 1px solid #282d35;
+  font-family: monospace;
+  font-size: 12px;
+  word-break: break-all;
+  color: #d1d5db;
 }
+
+.warning {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #211b0d;
+  border: 1px solid #66531b;
+  color: #fbbf24;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.hidden { display: none; }
 
 @media(max-width:500px) {
-  .container {
-    padding-top: 22px;
-  }
-
-  h1 {
-    font-size: 29px;
-  }
-
-  .stats {
-    grid-template-columns: 1fr;
-  }
+  .container { padding-top: 22px; }
+  h1 { font-size: 29px; }
+  .stats { grid-template-columns: 1fr; }
 }
 </style>
+
 </head>
 
 <body>
@@ -235,15 +242,12 @@ pre {
   <div class="header">
     <div class="brand">Ninebot BLE</div>
     <h1>🛴 Scooter Dashboard</h1>
-    <div class="subtitle">
-      BLE connection & diagnostics
-    </div>
+    <div class="subtitle">BLE connection & diagnostics</div>
   </div>
 
-
   <!-- CONNECTION -->
-  <div class="card hero">
 
+  <div class="card hero">
     <div>
       <div class="connection">
         <span id="dot" class="dot"></span>
@@ -251,172 +255,208 @@ pre {
       </div>
     </div>
 
-    <div class="scooter">🛴</div>
+```
+<div class="scooter">🛴</div>
+```
 
   </div>
 
+  <!-- CONNECTION BUTTONS -->
 
-  <!-- BUTTONS -->
   <div class="card">
 
-    <button id="connectButton" onclick="connectScooter()">
-      🔵 Connect Scooter
-    </button>
+```
+<button id="connectButton" onclick="connectScooter()">
+  🔵 Connect Scooter
+</button>
 
-    <button
-      id="disconnectButton"
-      class="secondary hidden"
-      onclick="disconnectScooter()">
-      Disconnect
-    </button>
+<button
+  id="disconnectButton"
+  class="secondary hidden"
+  onclick="disconnectScooter()">
+  Disconnect
+</button>
 
-    <button
-      id="clearButton"
-      class="secondary"
-      onclick="clearLog()">
-      Clear diagnostics
-    </button>
+<button
+  id="clearButton"
+  class="secondary"
+  onclick="clearLog()">
+  Clear diagnostics
+</button>
 
-    <button
-      id="copyButton"
-      class="secondary"
-      onclick="copyLog()">
-      Copy diagnostics
-    </button>
+<button
+  id="copyButton"
+  class="secondary"
+  onclick="copyLog()">
+  Copy diagnostics
+</button>
+```
 
   </div>
-
 
   <!-- DEVICE -->
+
   <div class="card">
 
-    <div class="section-title">
-      Scooter
-    </div>
+```
+<div class="section-title">Scooter</div>
 
-    <div id="deviceName" class="device-name">
-      Not connected
-    </div>
+<div id="deviceName" class="device-name">
+  Not connected
+</div>
 
-    <div id="deviceId" class="device-id"></div>
+<div id="deviceId" class="device-id"></div>
+```
 
   </div>
 
+  <!-- LOCK / UNLOCK -->
+
+  <div class="card">
+
+```
+<div class="section-title">
+  Vehicle Lock
+</div>
+
+<div class="notice">
+  Test interface for the suspected SNSC 2.3 lock protocol.
+  Controls remain in preview mode until the BLE frame is verified.
+</div>
+
+<button
+  id="unlockButton"
+  class="unlock"
+  onclick="prepareUnlock()"
+  disabled>
+  🔓 Unlock
+</button>
+
+<button
+  id="lockButton"
+  class="lock"
+  onclick="prepareLock()"
+  disabled>
+  🔒 Lock
+</button>
+
+<div id="framePreview" class="test-frame">
+  No frame selected.
+</div>
+
+<div class="warning">
+  ⚠️ PREVIEW MODE — no data is written to the scooter.
+  The displayed frames are not assumed to be verified for
+  your specific firmware.
+</div>
+```
+
+  </div>
 
   <!-- STATUS -->
+
   <div class="card">
 
-    <div class="section-title">
-      Connection
-    </div>
+```
+<div class="section-title">Connection</div>
 
-    <div class="stats">
+<div class="stats">
 
-      <div class="stat">
-        <div class="label">Bluetooth</div>
-        <div id="bluetoothStatus" class="value">Offline</div>
-      </div>
-
-      <div class="stat">
-        <div class="label">GATT</div>
-        <div id="gattStatus" class="value">Offline</div>
-      </div>
-
-      <div class="stat">
-        <div class="label">Services</div>
-        <div id="serviceCount" class="value">—</div>
-      </div>
-
-      <div class="stat">
-        <div class="label">Characteristics</div>
-        <div id="characteristicCount" class="value">—</div>
-      </div>
-
-      <div class="stat">
-        <div class="label">Notifications</div>
-        <div id="notificationStatus" class="value">Off</div>
-      </div>
-
-      <div class="stat">
-        <div class="label">Packets received</div>
-        <div id="packetCount" class="value">0</div>
-      </div>
-
-    </div>
-
+  <div class="stat">
+    <div class="label">Bluetooth</div>
+    <div id="bluetoothStatus" class="value">Offline</div>
   </div>
 
+  <div class="stat">
+    <div class="label">GATT</div>
+    <div id="gattStatus" class="value">Offline</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">Services</div>
+    <div id="serviceCount" class="value">—</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">Characteristics</div>
+    <div id="characteristicCount" class="value">—</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">Notifications</div>
+    <div id="notificationStatus" class="value">Off</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">Packets received</div>
+    <div id="packetCount" class="value">0</div>
+  </div>
+
+</div>
+```
+
+  </div>
 
   <!-- KNOWN BLE INTERFACE -->
+
   <div class="card">
 
-    <div class="section-title">
-      Detected BLE interface
-    </div>
+```
+<div class="section-title">
+  Detected BLE interface
+</div>
 
-    <div class="notice">
-      The interface discovered from your scooter.
-    </div>
+<div class="notice">
+  Interface discovered from the scooter.
+</div>
 
-    <div class="uuid">
-      Service<br>
-      86531001-43E6-47B7-9CB0-5FC21D4AE340
-    </div>
+<div class="uuid">
+  Service<br>
+  86531001-43E6-47B7-9CB0-5FC21D4AE340
+</div>
 
-    <div class="uuid">
-      Notify<br>
-      86531003-43E6-47B7-9CB0-5FC21D4AE340
-    </div>
+<div class="uuid">
+  Notify<br>
+  86531003-43E6-47B7-9CB0-5FC21D4AE340
+</div>
 
-    <div class="uuid">
-      Write<br>
-      86531002-43E6-47B7-9CB0-5FC21D4AE340
-    </div>
+<div class="uuid">
+  Write<br>
+  86531002-43E6-47B7-9CB0-5FC21D4AE340
+</div>
+```
 
   </div>
-
 
   <!-- LIVE DATA -->
+
   <div class="card">
 
-    <div class="section-title">
-      Live BLE data
-    </div>
+```
+<div class="section-title">
+  Live BLE data
+</div>
 
-    <pre id="liveData">Waiting for notifications...</pre>
+<pre id="liveData">Waiting for notifications...</pre>
+```
 
   </div>
-
 
   <!-- FULL LOG -->
+
   <div class="card">
 
-    <div class="section-title">
-      Bluetooth diagnostics
-    </div>
+```
+<div class="section-title">
+  Bluetooth diagnostics
+</div>
 
-    <pre id="diagnostics">Nothing discovered yet.</pre>
-
-  </div>
-
-
-  <!-- SAFETY INFO -->
-  <div class="card">
-
-    <div class="section-title">
-      About
-    </div>
-
-    <div class="notice">
-      This dashboard listens to the scooter's notification channel
-      and displays the data received from it. It does not send
-      unknown commands to the scooter.
-    </div>
+<pre id="diagnostics">Nothing discovered yet.</pre>
+```
 
   </div>
 
 </div>
-
 
 <script>
 
@@ -438,6 +478,22 @@ const WRITE_UUID =
 
 /*
 ==================================================
+SUSPECTED LOCK / UNLOCK FRAMES
+==================================================
+
+These are displayed for testing/analysis only.
+They are NOT transmitted by this version.
+*/
+
+const UNLOCK_FRAME =
+  "5A A5 02 3E 20 03 70 00 00 F2 F2";
+
+const LOCK_FRAME =
+  "5A A5 02 3E 20 03 70 01 00 F1 F2";
+
+
+/*
+==================================================
 GLOBAL VARIABLES
 ==================================================
 */
@@ -450,7 +506,6 @@ let notifyCharacteristic = null;
 let writeCharacteristic = null;
 
 let packetCount = 0;
-
 let diagnosticLines = [];
 
 
@@ -472,13 +527,11 @@ function setStatus(text, type = "") {
 
   dot.className = "dot";
 
-  if (type === "connected") {
+  if (type === "connected")
     dot.classList.add("connected");
-  }
 
-  if (type === "error") {
+  if (type === "error")
     dot.classList.add("error");
-  }
 }
 
 
@@ -491,6 +544,59 @@ function setValue(id, text, className = "") {
 
   element.className =
     "value " + className;
+}
+
+
+function updateControlState() {
+
+  const connected =
+    !!(
+      device &&
+      device.gatt &&
+      device.gatt.connected
+    );
+
+  document.getElementById("unlockButton").disabled =
+    !connected;
+
+  document.getElementById("lockButton").disabled =
+    !connected;
+}
+
+
+/*
+==================================================
+LOCK / UNLOCK PREVIEW
+==================================================
+*/
+
+function prepareUnlock() {
+
+  document.getElementById("framePreview").textContent =
+    "UNLOCK FRAME (PREVIEW ONLY):\n\n" +
+    UNLOCK_FRAME;
+
+  setStatus("Unlock frame prepared");
+
+  log(
+    "UNLOCK FRAME PREPARED — PREVIEW ONLY\n" +
+    UNLOCK_FRAME
+  );
+}
+
+
+function prepareLock() {
+
+  document.getElementById("framePreview").textContent =
+    "LOCK FRAME (PREVIEW ONLY):\n\n" +
+    LOCK_FRAME;
+
+  setStatus("Lock frame prepared");
+
+  log(
+    "LOCK FRAME PREPARED — PREVIEW ONLY\n" +
+    LOCK_FRAME
+  );
 }
 
 
@@ -614,17 +720,14 @@ function handleNotification(event) {
   ).textContent =
     packetCount;
 
-
   const hex =
     bytesToHex(value);
 
   const ascii =
     bytesToAscii(value);
 
-
   const timestamp =
     new Date().toLocaleTimeString();
-
 
   const packet =
     `[${timestamp}]
@@ -634,12 +737,10 @@ ${hex}
 ASCII:
 ${ascii}`;
 
-
   document.getElementById(
     "liveData"
   ).textContent =
     packet;
-
 
   log(
     "NOTIFICATION RECEIVED\n" +
@@ -671,18 +772,11 @@ async function connectScooter() {
     return;
   }
 
-
   try {
 
     setStatus(
       "Choose your scooter..."
     );
-
-
-    /*
-    We use acceptAllDevices because the
-    service UUID is vendor-specific.
-    */
 
     device =
       await navigator.bluetooth.requestDevice({
@@ -695,19 +789,16 @@ async function connectScooter() {
 
       });
 
-
     document.getElementById(
       "deviceName"
     ).textContent =
       device.name ||
       "Unnamed scooter";
 
-
     document.getElementById(
       "deviceId"
     ).textContent =
       device.id || "";
-
 
     setValue(
       "bluetoothStatus",
@@ -715,15 +806,12 @@ async function connectScooter() {
       "yellow"
     );
 
-
     setStatus(
       "Connecting..."
     );
 
-
     server =
       await device.gatt.connect();
-
 
     setValue(
       "gattStatus",
@@ -731,63 +819,45 @@ async function connectScooter() {
       "green"
     );
 
-
     setStatus(
       "Connected",
       "connected"
     );
 
-
     document.getElementById(
       "connectButton"
     ).classList.add("hidden");
-
 
     document.getElementById(
       "disconnectButton"
     ).classList.remove("hidden");
 
-
     log(
       "GATT CONNECTION SUCCESSFUL"
     );
-
-
-    /*
-    Get the known service.
-    */
 
     service =
       await server.getPrimaryService(
         SERVICE_UUID
       );
 
-
     log(
       "SERVICE FOUND\n" +
       SERVICE_UUID
     );
 
-
-    /*
-    Get all characteristics.
-    */
-
     const characteristics =
       await service.getCharacteristics();
-
 
     setValue(
       "serviceCount",
       "1"
     );
 
-
     setValue(
       "characteristicCount",
       characteristics.length
     );
-
 
     log(
       "CHARACTERISTICS FOUND\n" +
@@ -795,35 +865,22 @@ async function connectScooter() {
       characteristics.length
     );
 
-
-    /*
-    Find the notification characteristic.
-    */
-
     notifyCharacteristic =
       await service.getCharacteristic(
         NOTIFY_UUID
       );
-
 
     log(
       "NOTIFY CHARACTERISTIC FOUND\n" +
       NOTIFY_UUID
     );
 
-
-    /*
-    Start notifications.
-    */
-
     notifyCharacteristic.addEventListener(
       "characteristicvaluechanged",
       handleNotification
     );
 
-
     await notifyCharacteristic.startNotifications();
-
 
     setValue(
       "notificationStatus",
@@ -831,23 +888,15 @@ async function connectScooter() {
       "green"
     );
 
-
     log(
       "NOTIFICATIONS ACTIVE\n" +
       "Listening for scooter data..."
     );
 
-
-    /*
-    Find the writable characteristic,
-    but DO NOT send anything to it.
-    */
-
     writeCharacteristic =
       await service.getCharacteristic(
         WRITE_UUID
       );
-
 
     log(
       "WRITE CHARACTERISTIC FOUND\n" +
@@ -856,30 +905,24 @@ async function connectScooter() {
       "Properties:\n" +
       getProperties(writeCharacteristic) +
       "\n\n" +
-      "No data has been written."
+      "NO DATA HAS BEEN WRITTEN."
     );
-
-
-    /*
-    Handle disconnects.
-    */
 
     device.addEventListener(
       "gattserverdisconnected",
       handleDisconnect
     );
 
+    updateControlState();
 
   } catch(error) {
 
     console.error(error);
 
-
     setStatus(
       "Connection failed",
       "error"
     );
-
 
     setValue(
       "gattStatus",
@@ -887,14 +930,14 @@ async function connectScooter() {
       "red"
     );
 
-
     log(
       "ERROR\n\n" +
-      error.name +
+      (error?.name || "Unknown error") +
       "\n" +
-      error.message
+      (error?.message || String(error))
     );
 
+    updateControlState();
   }
 }
 
@@ -940,15 +983,14 @@ function disconnectScooter() {
 
     if (
       notifyCharacteristic &&
-      notifyCharacteristic.service.device &&
       device &&
+      device.gatt &&
       device.gatt.connected
     ) {
 
       notifyCharacteristic
         .stopNotifications()
         .catch(() => {});
-
     }
 
   } catch {}
@@ -964,7 +1006,6 @@ function disconnectScooter() {
   } else {
 
     handleDisconnect();
-
   }
 }
 
@@ -976,50 +1017,44 @@ function handleDisconnect() {
     "error"
   );
 
-
   setValue(
     "bluetoothStatus",
     "Offline"
   );
-
 
   setValue(
     "gattStatus",
     "Offline"
   );
 
-
   setValue(
     "notificationStatus",
     "Off"
   );
 
-
   document.getElementById(
     "connectButton"
   ).classList.remove("hidden");
 
-
   document.getElementById(
     "disconnectButton"
   ).classList.add("hidden");
-
 
   document.getElementById(
     "liveData"
   ).textContent =
     "Waiting for notifications...";
 
-
   log(
     "SCOOTER DISCONNECTED"
   );
-
 
   notifyCharacteristic = null;
   writeCharacteristic = null;
   service = null;
   server = null;
+
+  updateControlState();
 }
 
 
@@ -1038,6 +1073,8 @@ setValue(
   "characteristicCount",
   "—"
 );
+
+updateControlState();
 
 </script>
 
