@@ -471,13 +471,9 @@ async function connect() {
     
     // Look for devices with Nordic UART Service
     device = await navigator.bluetooth.requestDevice({
-      filters: [
-        { services: [SERVICE_UUID] },
-        { namePrefix: 'Ninebot' },
-        { namePrefix: 'MAX' }
-      ],
-      optionalServices: [SERVICE_UUID]
-    });
+  acceptAllDevices: true,
+  optionalServices: [SERVICE_UUID]
+});
     
     log(`Found device: ${device.name || 'Unknown'}`);
     document.getElementById('deviceName').textContent = device.name || 'Unknown';
