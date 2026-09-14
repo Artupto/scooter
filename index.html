@@ -3,288 +3,198 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ninebot BLE Dashboard</title>
+<title>Ninebot Max BLE Controller</title>
 <style>
-* {
-  box-sizing: border-box;
-}
-
+* { box-sizing: border-box; }
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top, #202832 0%, #0e1014 45%, #08090b 100%);
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: radial-gradient(circle at top, #1a1f2e 0%, #0d1117 45%, #010409 100%);
+  color: #e6edf3;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.5;
 }
-
 .container {
-  width: min(94%, 760px);
+  width: min(96%, 800px);
   margin: auto;
-  padding: 28px 0 50px;
+  padding: 24px 16px 60px;
 }
-
 .header {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
-
 .brand {
-  color: #8b95a7;
-  font-size: 13px;
-  font-weight: 800;
+  color: #7d8590;
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
-
 h1 {
-  margin: 5px 0;
-  font-size: 34px;
+  margin: 8px 0;
+  font-size: 32px;
+  font-weight: 600;
 }
-
 .subtitle {
-  color: #8b95a7;
+  color: #7d8590;
   font-size: 14px;
 }
-
 .card {
-  background: rgba(24, 27, 33, .94);
-  border: 1px solid #303640;
-  border-radius: 22px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 16px;
   padding: 20px;
-  margin-bottom: 15px;
-  box-shadow: 0 12px 35px rgba(0,0,0,.22);
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
 }
-
-.hero {
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 16px;
 }
-
-.scooter {
-  font-size: 55px;
+.card-title {
+  color: #e6edf3;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
-
-.connection {
+.status-indicator {
   display: flex;
   align-items: center;
-  gap: 9px;
-  color: #9ca3af;
+  gap: 8px;
+  font-size: 13px;
+  color: #7d8590;
 }
-
 .dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #6b7280;
+  background: #484f58;
+  transition: all 0.2s;
 }
-
-.dot.connected {
-  background: #4ade80;
-  box-shadow: 0 0 12px #4ade80;
+.dot.connected { background: #3fb950; box-shadow: 0 0 10px #3fb950; }
+.dot.error { background: #f85149; }
+.dot.pending { background: #d29922; animation: pulse 1.5s infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
-
-.dot.error {
-  background: #f87171;
-}
-
 button {
-  width: 100%;
   border: 0;
-  border-radius: 15px;
-  padding: 15px;
-  font-size: 16px;
-  font-weight: 750;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  background: white;
-  color: #090a0d;
-  margin-bottom: 10px;
-}
-
-button:active {
-  transform: scale(.98);
-}
-
-button.secondary {
-  background: #292e36;
+  transition: all 0.15s;
+  background: #238636;
   color: white;
 }
-
-button.danger {
-  background: #ef4444;
-  color: white;
-}
-
-button.success {
-  background: #22c55e;
-  color: white;
-}
-
+button:hover:not(:disabled) { filter: brightness(1.1); }
+button:active:not(:disabled) { transform: scale(0.97); }
 button:disabled {
-  opacity: .45;
+  opacity: 0.5;
   cursor: not-allowed;
 }
-
-.section-title {
-  color: #8b95a7;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  margin-bottom: 13px;
+button.secondary {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
 }
-
-.device-name {
-  font-size: 22px;
-  font-weight: 750;
-  word-break: break-word;
+button.secondary:hover:not(:disabled) {
+  background: #30363d;
+  border-color: #8b949e;
 }
-
-.device-id {
-  color: #717b8d;
-  font-size: 12px;
-  margin-top: 5px;
-  word-break: break-all;
+button.danger {
+  background: #da3633;
 }
-
-.stats {
+button.large {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.button-group button {
+  flex: 1;
+  min-width: 140px;
+}
+.grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
-
-.stat {
-  background: #111419;
-  border: 1px solid #282d35;
-  border-radius: 15px;
-  padding: 16px;
+@media(max-width: 600px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .button-group button { min-width: 100%; }
 }
-
-.label {
-  color: #858e9e;
-  font-size: 12px;
-  margin-bottom: 7px;
-}
-
-.value {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.green {
-  color: #4ade80;
-}
-
-.yellow {
-  color: #fbbf24;
-}
-
-.red {
-  color: #f87171;
-}
-
-.gray {
-  color: #9ca3af;
-}
-
-.lock-state {
+.scooter-visual {
   text-align: center;
-  padding: 25px 15px;
-  border-radius: 18px;
-  background: #111419;
-  border: 1px solid #282d35;
+  font-size: 64px;
+  margin: 20px 0;
 }
-
+.lock-display {
+  text-align: center;
+  padding: 30px 20px;
+  background: #0d1117;
+  border: 2px solid #30363d;
+  border-radius: 14px;
+  margin-bottom: 16px;
+}
 .lock-icon {
-  font-size: 48px;
+  font-size: 56px;
+  margin-bottom: 12px;
+}
+.lock-status {
+  font-size: 24px;
+  font-weight: 700;
   margin-bottom: 8px;
 }
-
-.lock-value {
-  font-size: 28px;
-  font-weight: 850;
-  letter-spacing: .5px;
-}
-
+.lock-status.locked { color: #f85149; }
+.lock-status.unlocked { color: #3fb950; }
+.lock-status.unknown { color: #7d8590; }
 .lock-detail {
-  margin-top: 8px;
-  color: #858e9e;
+  color: #7d8590;
   font-size: 13px;
 }
-
-.control-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 15px;
-}
-
 pre {
   margin: 0;
-  background: #080a0d;
-  border: 1px solid #252a32;
-  border-radius: 14px;
-  padding: 15px;
-  color: #b7c0ce;
-  font-family: monospace;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 16px;
+  color: #a5d6ff;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 12px;
-  line-height: 1.55;
+  line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 420px;
+  max-height: 300px;
   overflow-y: auto;
 }
-
-.notice {
-  color: #8b95a7;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.uuid {
-  font-family: monospace;
-  font-size: 12px;
-  color: #b7c0ce;
-  word-break: break-all;
-  background: #101318;
-  padding: 10px;
-  border-radius: 10px;
-  margin-top: 8px;
-}
-
-.analysis {
-  margin-top: 10px;
+.uuid-box {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 8px;
   padding: 12px;
-  border-radius: 12px;
-  background: #101318;
-  border: 1px solid #282d35;
+  margin-top: 8px;
   font-family: monospace;
   font-size: 12px;
-  word-break: break-word;
-  color: #d1d5db;
+  color: #a5d6ff;
+  word-break: break-all;
 }
-
-.hidden {
-  display: none;
+.uuid-label {
+  color: #7d8590;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
-
-@media(max-width:500px) {
-  .container {
-    padding-top: 22px;
-  }
-
-  h1 {
-    font-size: 29px;
-  }
-
-  .stats {
-    grid-template-columns: 1fr;
-  }
-  
-  .control-buttons {
-    grid-template-columns: 1fr;
-  }
-}
+.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -292,561 +202,415 @@ pre {
 <div class="container">
 
   <div class="header">
-    <div class="brand">Ninebot BLE</div>
-    <h1>🛴 Scooter Dashboard</h1>
-    <div class="subtitle">BLE connection & lock control</div>
+    <div class="brand">Ninebot Max Commercial</div>
+    <h1>🛴 BLE Controller</h1>
+    <div class="subtitle">Direct lock/unlock control for Ryder v.8 / Max fleet scooters</div>
   </div>
 
-  <!-- CONNECTION -->
-
-  <div class="card hero">
-    <div>
-      <div class="connection">
+  <!-- CONNECTION STATUS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Connection</div>
+      <div class="status-indicator">
         <span id="dot" class="dot"></span>
-        <span id="status">Ready</span>
+        <span id="statusText">Disconnected</span>
       </div>
     </div>
-    <div class="scooter">🛴</div>
-  </div>
-
-  <!-- CONNECTION BUTTONS -->
-
-  <div class="card">
-    <button id="connectButton" onclick="connectScooter()">
-      🔵 Connect Scooter
+    
+    <div class="scooter-visual">🛴</div>
+    
+    <button id="connectBtn" class="large" onclick="connect()">
+      🔵 Connect to Scooter
     </button>
-    <button id="disconnectButton" class="secondary hidden" onclick="disconnectScooter()">
+    <button id="disconnectBtn" class="large secondary hidden" onclick="disconnect()">
       Disconnect
     </button>
-    <button id="clearButton" class="secondary" onclick="clearLog()">
-      Clear diagnostics
-    </button>
-    <button id="copyButton" class="secondary" onclick="copyLog()">
-      Copy diagnostics
-    </button>
   </div>
 
-  <!-- DEVICE -->
-
+  <!-- LOCK CONTROL -->
   <div class="card">
-    <div class="section-title">Scooter</div>
-    <div id="deviceName" class="device-name">Not connected</div>
-    <div id="deviceId" class="device-id"></div>
-  </div>
-
-  <!-- LOCK STATE & CONTROLS -->
-
-  <div class="card">
-    <div class="section-title">Lock Control</div>
+    <div class="card-header">
+      <div class="card-title">Lock Control</div>
+    </div>
     
-    <div class="lock-state">
+    <div class="lock-display">
       <div id="lockIcon" class="lock-icon">⚪</div>
-      <div id="lockState" class="lock-value gray">UNKNOWN</div>
-      <div id="lockDetail" class="lock-detail">Connect to scooter to control lock</div>
+      <div id="lockStatus" class="lock-status unknown">UNKNOWN</div>
+      <div id="lockDetail" class="lock-detail">Connect to control scooter</div>
     </div>
 
-    <div class="control-buttons">
-      <button id="unlockButton" class="success" onclick="unlockScooter()" disabled>
+    <div class="button-group">
+      <button id="unlockBtn" class="success" onclick="sendUnlock()" disabled>
         🔓 Unlock
       </button>
-      <button id="lockButton" class="danger" onclick="lockScooter()" disabled>
+      <button id="lockBtn" class="danger" onclick="sendLock()" disabled>
         🔒 Lock
       </button>
     </div>
   </div>
 
-  <!-- STATUS -->
-
+  <!-- DEVICE INFO -->
   <div class="card">
-    <div class="section-title">Connection</div>
-    <div class="stats">
-      <div class="stat">
-        <div class="label">Bluetooth</div>
-        <div id="bluetoothStatus" class="value">Offline</div>
+    <div class="card-header">
+      <div class="card-title">Device</div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div style="color:#7d8590; font-size:12px; margin-bottom:4px;">Name</div>
+        <div id="deviceName" style="font-weight:600;">Not connected</div>
       </div>
-      <div class="stat">
-        <div class="label">GATT</div>
-        <div id="gattStatus" class="value">Offline</div>
-      </div>
-      <div class="stat">
-        <div class="label">Services</div>
-        <div id="serviceCount" class="value">—</div>
-      </div>
-      <div class="stat">
-        <div class="label">Characteristics</div>
-        <div id="characteristicCount" class="value">—</div>
-      </div>
-      <div class="stat">
-        <div class="label">Notifications</div>
-        <div id="notificationStatus" class="value">Off</div>
-      </div>
-      <div class="stat">
-        <div class="label">Packets received</div>
-        <div id="packetCount" class="value">0</div>
+      <div>
+        <div style="color:#7d8590; font-size:12px; margin-bottom:4px;">ID</div>
+        <div id="deviceId" style="font-family:monospace; font-size:12px;">—</div>
       </div>
     </div>
   </div>
 
-  <!-- KNOWN BLE INTERFACE -->
-
+  <!-- BLE INTERFACE -->
   <div class="card">
-    <div class="section-title">Detected BLE interface</div>
-    <div class="notice">Interface discovered from the scooter.</div>
-    <div class="uuid">
-      Service<br>
+    <div class="card-header">
+      <div class="card-title">BLE Interface</div>
+    </div>
+    <div class="uuid-box">
+      <div class="uuid-label">Service UUID</div>
       86531001-43E6-47B7-9CB0-5FC21D4AE340
     </div>
-    <div class="uuid">
-      Notify<br>
-      86531003-43E6-47B7-9CB0-5FC21D4AE340
-    </div>
-    <div class="uuid">
-      Write<br>
+    <div class="uuid-box">
+      <div class="uuid-label">Write Characteristic</div>
       86531002-43E6-47B7-9CB0-5FC21D4AE340
     </div>
+    <div class="uuid-box">
+      <div class="uuid-label">Notify Characteristic</div>
+      86531003-43E6-47B7-9CB0-5FC21D4AE340
+    </div>
   </div>
 
-  <!-- LIVE DATA -->
-
+  <!-- ACTIVITY LOG -->
   <div class="card">
-    <div class="section-title">Live BLE data</div>
-    <pre id="liveData">Waiting for notifications...</pre>
-    <div id="packetAnalysis" class="analysis">No packets received yet.</div>
-  </div>
-
-  <!-- FULL LOG -->
-
-  <div class="card">
-    <div class="section-title">Bluetooth diagnostics</div>
-    <pre id="diagnostics">Nothing discovered yet.</pre>
+    <div class="card-header">
+      <div class="card-title">Activity Log</div>
+      <button class="secondary" onclick="clearLog()" style="padding:6px 12px; font-size:12px;">
+        Clear
+      </button>
+    </div>
+    <pre id="log">Ready to connect...</pre>
   </div>
 
 </div>
 
 <script>
 
-/*
-==================================================
-NINEBOT BLE UUIDs
-==================================================
-*/
+// ============================================
+// NINEBOT MAX PROTOCOL 2 CONFIGURATION
+// ============================================
 
 const SERVICE_UUID = "86531001-43E6-47B7-9CB0-5FC21D4AE340";
-const NOTIFY_UUID = "86531003-43E6-47B7-9CB0-5FC21D4AE340";
 const WRITE_UUID = "86531002-43E6-47B7-9CB0-5FC21D4AE340";
+const NOTIFY_UUID = "86531003-43E6-47B7-9CB0-5FC21D4AE340";
 
-/*
-==================================================
-NINEBOT PROTOCOL 1 CONSTANTS
-==================================================
-*/
+// Protocol 2 Constants (Ninebot Max uses this)
+const PROTOCOL = {
+  HEADER1: 0x5A,      // Protocol 2 header
+  HEADER2: 0xA5,
+  BT_ID: 0x3E,        // Bluetooth ID (always 0x3E)
+  TARGET_DIS: 0x01,   // Dashboard/Display board
+  TARGET_MCU: 0x02,   // Motor control unit
+  CMD_WRITE: 0x03,    // Write command
+  REG_LOCK: 0x70      // Lock register address
+};
 
-const PROTOCOL_HEADER_1 = 0x55;
-const PROTOCOL_HEADER_2 = 0xAA;
-const CMD_WRITE = 0x03;
-const CMD_WRITE_NR = 0x03;
-const TARGET_DIS = 0x01;  // Dashboard/Display board
-const TARGET_MCU = 0x02;  // Motor control unit
-const LOCK_REGISTER = 0x70;  // Lock state register index
-
-/*
-==================================================
-GLOBAL VARIABLES
-==================================================
-*/
+// ============================================
+// STATE
+// ============================================
 
 let device = null;
 let server = null;
 let service = null;
-let notifyCharacteristic = null;
-let writeCharacteristic = null;
-let packetCount = 0;
-let diagnosticLines = [];
-let isLocked = null;
+let writeChar = null;
+let notifyChar = null;
+let isConnected = false;
 
-/*
-==================================================
-UI HELPERS
-==================================================
-*/
+// ============================================
+// UI HELPERS
+// ============================================
 
-function setStatus(text, type = "") {
-  const status = document.getElementById("status");
-  const dot = document.getElementById("dot");
-  status.textContent = text;
-  dot.className = "dot";
-  if (type === "connected") dot.classList.add("connected");
-  if (type === "error") dot.classList.add("error");
+function log(msg) {
+  const el = document.getElementById('log');
+  const time = new Date().toLocaleTimeString();
+  el.textContent += `\n[${time}] ${msg}`;
+  el.scrollTop = el.scrollHeight;
 }
 
-function setValue(id, text, className = "") {
-  const element = document.getElementById(id);
-  element.textContent = text;
-  element.className = "value " + className;
+function clearLog() {
+  document.getElementById('log').textContent = 'Log cleared.';
 }
 
-function setLockState(state, detail) {
-  const icon = document.getElementById("lockIcon");
-  const value = document.getElementById("lockState");
-  const details = document.getElementById("lockDetail");
+function setStatus(text, type) {
+  document.getElementById('statusText').textContent = text;
+  const dot = document.getElementById('dot');
+  dot.className = 'dot ' + (type || '');
+}
+
+function setLockState(locked, detail) {
+  const icon = document.getElementById('lockIcon');
+  const status = document.getElementById('lockStatus');
+  const detailEl = document.getElementById('lockDetail');
   
-  isLocked = state;
-  
-  if (state === true) {  // Locked
-    icon.textContent = "🔒";
-    value.textContent = "LOCKED";
-    value.className = "lock-value red";
-  } else if (state === false) {  // Unlocked
-    icon.textContent = "🔓";
-    value.textContent = "UNLOCKED";
-    value.className = "lock-value green";
+  if (locked === true) {
+    icon.textContent = '🔒';
+    status.textContent = 'LOCKED';
+    status.className = 'lock-status locked';
+  } else if (locked === false) {
+    icon.textContent = '🔓';
+    status.textContent = 'UNLOCKED';
+    status.className = 'lock-status unlocked';
   } else {
-    icon.textContent = "⚪";
-    value.textContent = "UNKNOWN";
-    value.className = "lock-value gray";
+    icon.textContent = '⚪';
+    status.textContent = 'UNKNOWN';
+    status.className = 'lock-status unknown';
   }
   
-  details.textContent = detail || "Waiting for scooter status...";
-  
-  // Enable/disable buttons based on connection
-  const connected = device && device.gatt && device.gatt.connected;
-  document.getElementById("lockButton").disabled = !connected;
-  document.getElementById("unlockButton").disabled = !connected;
+  detailEl.textContent = detail || '';
 }
 
-function updateLockButtons(enabled) {
-  document.getElementById("lockButton").disabled = !enabled;
-  document.getElementById("unlockButton").disabled = !enabled;
+function setButtonsEnabled(enabled) {
+  document.getElementById('lockBtn').disabled = !enabled;
+  document.getElementById('unlockBtn').disabled = !enabled;
 }
 
-/*
-==================================================
-NINEBOT PROTOCOL 1 FRAME BUILDER
-==================================================
-*/
+// ============================================
+// PROTOCOL 2 FRAME BUILDER
+// ============================================
 
 function calculateChecksum(data) {
-  // Protocol 1: 15-bit inverted sum of bytes from index 2 to end
+  // Protocol 2: Sum of bytes from index 2 to (length-3), then invert lower 15 bits
   let sum = 0;
-  for (let i = 2; i < data.length; i++) {
+  // Checksum covers: LENGTH, BT_ID, TARGET, CMD, INDEX, DATA
+  // In Protocol 2: bytes [2] through [frame.length - 3]
+  for (let i = 2; i < data.length - 2; i++) {
     sum += data[i] & 0xFF;
   }
-  return (~sum) & 0x7FFF;
+  return (~sum) & 0x7FFF;  // 15-bit inverted sum
 }
 
-function buildLockFrame(lockState) {
+function buildCommandFrame(target, cmd, index, dataBytes) {
   /*
-  Protocol 1 Frame Structure:
-  [0] = 0x55 (SYNC_1)
-  [1] = 0xAA (SYNC_2)
-  [2] = LENGTH (payload length + 2 for INDEX and CMD)
-  [3] = TARGET_ID (0x01 for DIS board)
-  [4] = CMD (0x03 for write)
-  [5] = INDEX (0x70 for lock register)
-  [6] = DATA (0x01 = lock, 0x00 = unlock)
-  [7] = CRC_LO
-  [8] = CRC_HI
+  Protocol 2 Frame Structure:
+  [0]  = 0x5A (Header 1)
+  [1]  = 0xA5 (Header 2)
+  [2]  = LENGTH (payload data length only)
+  [3]  = BT_ID (0x3E)
+  [4]  = TARGET_ID
+  [5]  = CMD
+  [6]  = INDEX
+  [7+] = DATA bytes
+  [last-1] = CRC_LO
+  [last]   = CRC_HI
+  
+  Total size = 7 + data_length + 2 (CRC)
   */
   
-  const payloadLength = 2;  // INDEX + CMD bytes counted in Protocol 1
-  const dataLength = 1;   // One byte for lock state
+  const dataLen = dataBytes ? dataBytes.length : 0;
+  const frameLen = 7 + dataLen + 2;  // Header(2) + Len(1) + BT_ID + Target + Cmd + Index + Data + CRC(2)
   
-  const frame = new Uint8Array(7 + dataLength + 2); // Header(2) + Len(1) + Payload + Data + CRC(2)
+  const frame = new Uint8Array(frameLen);
   
-  frame[0] = PROTOCOL_HEADER_1;  // 0x55
-  frame[1] = PROTOCOL_HEADER_2;  // 0xAA
-  frame[2] = payloadLength + dataLength;  // Length includes INDEX, CMD, and DATA
-  frame[3] = TARGET_DIS;         // Target: Dashboard board
-  frame[4] = CMD_WRITE;          // Command: Write
-  frame[5] = LOCK_REGISTER;      // Register: Lock state (0x70)
-  frame[6] = lockState ? 0x01 : 0x00;  // Data: 1 = lock, 0 = unlock
+  frame[0] = PROTOCOL.HEADER1;  // 0x5A
+  frame[1] = PROTOCOL.HEADER2;  // 0xA5
+  frame[2] = dataLen + 2;       // LENGTH = data + INDEX + CMD (Protocol 2 counts payload only)
+  frame[3] = PROTOCOL.BT_ID;    // 0x3E
+  frame[4] = target;            // Target board
+  frame[5] = cmd;               // Command
+  frame[6] = index;             // Register index
   
+  // Add data bytes if any
+  if (dataBytes && dataBytes.length > 0) {
+    for (let i = 0; i < dataBytes.length; i++) {
+      frame[7 + i] = dataBytes[i];
+    }
+  }
+  
+  // Calculate and add checksum
   const crc = calculateChecksum(frame);
-  frame[7] = crc & 0xFF;         // CRC low byte
-  frame[8] = (crc >> 8) & 0xFF;  // CRC high byte
+  frame[frameLen - 2] = crc & 0xFF;        // CRC Low
+  frame[frameLen - 1] = (crc >> 8) & 0xFF; // CRC High
   
   return frame;
 }
 
-/*
-==================================================
-LOCK/UNLOCK COMMANDS
-==================================================
-*/
-
-async function sendLockCommand(lockState) {
-  if (!writeCharacteristic) {
-    log("ERROR: Write characteristic not available");
-    setStatus("Not connected", "error");
-    return false;
-  }
-  
-  try {
-    const frame = buildLockFrame(lockState);
-    const hexString = Array.from(frame).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
-    
-    log(`SENDING ${lockState ? 'LOCK' : 'UNLOCK'} COMMAND\nFrame: ${hexString}`);
-    
-    await writeCharacteristic.writeValue(frame);
-    
-    log(`COMMAND SENT SUCCESSFULLY\n${lockState ? 'Lock' : 'Unlock'} command transmitted`);
-    setLockState(lockState, `Scooter ${lockState ? 'locked' : 'unlocked'} via BLE command`);
-    
-    return true;
-  } catch (error) {
-    console.error(error);
-    log(`COMMAND FAILED\n${error?.name || 'Error'}: ${error?.message || String(error)}`);
-    setStatus("Command failed", "error");
-    return false;
-  }
+function buildLockFrame(lock) {
+  // Lock command: Target DIS (0x01), Write (0x03), Register 0x70, Data 0x01/0x00
+  return buildCommandFrame(
+    PROTOCOL.TARGET_DIS,  // 0x01
+    PROTOCOL.CMD_WRITE,   // 0x03
+    PROTOCOL.REG_LOCK,    // 0x70
+    [lock ? 0x01 : 0x00]  // 1 = lock, 0 = unlock
+  );
 }
 
-async function lockScooter() {
-  setStatus("Sending lock command...");
-  await sendLockCommand(true);
-}
+// ============================================
+// BLE OPERATIONS
+// ============================================
 
-async function unlockScooter() {
-  setStatus("Sending unlock command...");
-  await sendLockCommand(false);
-}
-
-/*
-==================================================
-PACKET ANALYSIS
-==================================================
-*/
-
-function analyzePacket(hex, dataView) {
-  const normalized = hex.replace(/\s+/g, "").toUpperCase();
-  const analysis = document.getElementById("packetAnalysis");
-  
-  // Check for Protocol 1 header
-  if (normalized.startsWith("55AA")) {
-    // Try to parse lock state from response
-    // Look for 0x70 in the packet which indicates lock register
-    const bytes = new Uint8Array(dataView.buffer, dataView.byteOffset, dataView.byteLength);
-    
-    for (let i = 0; i < bytes.length - 1; i++) {
-      if (bytes[i] === 0x70) {
-        // Found lock register reference
-        if (i + 1 < bytes.length) {
-          const lockValue = bytes[i + 1];
-          if (lockValue === 0x01) {
-            setLockState(true, "Scooter reports LOCKED state");
-            analysis.textContent = "Packet indicates LOCKED state (0x70 = 0x01)";
-            return;
-          } else if (lockValue === 0x00) {
-            setLockState(false, "Scooter reports UNLOCKED state");
-            analysis.textContent = "Packet indicates UNLOCKED state (0x70 = 0x00)";
-            return;
-          }
-        }
-      }
-    }
-    
-    analysis.textContent = "Protocol 1 packet received (0x55 0xAA header valid)";
-    return;
-  }
-  
-  analysis.textContent = "Packet received. No known lock-state field detected.";
-}
-
-/*
-==================================================
-LOGGING
-==================================================
-*/
-
-function log(text) {
-  diagnosticLines.push(text);
-  document.getElementById("diagnostics").textContent = diagnosticLines.join("\n\n");
-}
-
-function clearLog() {
-  diagnosticLines = [];
-  document.getElementById("diagnostics").textContent = "Diagnostics cleared.";
-  document.getElementById("liveData").textContent = "Waiting for notifications...";
-  document.getElementById("packetAnalysis").textContent = "No packets received yet.";
-  packetCount = 0;
-  document.getElementById("packetCount").textContent = "0";
-  setLockState(null, "Waiting for scooter status...");
-}
-
-async function copyLog() {
-  const text = diagnosticLines.join("\n\n");
-  try {
-    await navigator.clipboard.writeText(text);
-    setStatus("Diagnostics copied");
-  } catch {
-    setStatus("Could not copy diagnostics", "error");
-  }
-}
-
-/*
-==================================================
-BYTE CONVERSION
-==================================================
-*/
-
-function bytesToHex(dataView) {
-  const bytes = new Uint8Array(dataView.buffer, dataView.byteOffset, dataView.byteLength);
-  return Array.from(bytes).map(byte => byte.toString(16).padStart(2, "0").toUpperCase()).join(" ");
-}
-
-function bytesToAscii(dataView) {
-  const bytes = new Uint8Array(dataView.buffer, dataView.byteOffset, dataView.byteLength);
-  return Array.from(bytes).map(byte => {
-    if (byte >= 32 && byte <= 126) return String.fromCharCode(byte);
-    return ".";
-  }).join("");
-}
-
-/*
-==================================================
-NOTIFICATION HANDLER
-==================================================
-*/
-
-function handleNotification(event) {
-  const value = event.target.value;
-  packetCount++;
-  document.getElementById("packetCount").textContent = packetCount;
-  
-  const hex = bytesToHex(value);
-  const ascii = bytesToAscii(value);
-  const timestamp = new Date().toLocaleTimeString();
-  
-  const packet = `[${timestamp}]\nHEX:\n${hex}\n\nASCII:\n${ascii}`;
-  document.getElementById("liveData").textContent = packet;
-  
-  analyzePacket(hex, value);
-  
-  log("NOTIFICATION RECEIVED\n" + packet);
-}
-
-/*
-==================================================
-CONNECT
-==================================================
-*/
-
-async function connectScooter() {
+async function connect() {
   if (!navigator.bluetooth) {
-    setStatus("Web Bluetooth unavailable", "error");
-    log("ERROR\nThis browser does not expose Web Bluetooth.");
+    log('ERROR: Web Bluetooth not supported in this browser');
+    setStatus('Browser unsupported', 'error');
     return;
   }
   
   try {
-    setStatus("Choose your scooter...");
+    setStatus('Scanning...', 'pending');
+    log('Requesting Bluetooth device...');
     
     device = await navigator.bluetooth.requestDevice({
       acceptAllDevices: true,
       optionalServices: [SERVICE_UUID]
     });
     
-    document.getElementById("deviceName").textContent = device.name || "Unnamed scooter";
-    document.getElementById("deviceId").textContent = device.id || "";
-    setValue("bluetoothStatus", "Selected", "yellow");
-    setStatus("Connecting...");
+    log(`Found device: ${device.name || 'Unknown'}`);
+    document.getElementById('deviceName').textContent = device.name || 'Unknown';
+    document.getElementById('deviceId').textContent = device.id || 'N/A';
+    
+    setStatus('Connecting...', 'pending');
     
     server = await device.gatt.connect();
-    setValue("gattStatus", "Connected", "green");
-    setStatus("Connected", "connected");
-    
-    document.getElementById("connectButton").classList.add("hidden");
-    document.getElementById("disconnectButton").classList.remove("hidden");
-    
-    setLockState(null, "Connected — ready to send commands");
-    updateLockButtons(true);
-    
-    log("GATT CONNECTION SUCCESSFUL");
+    log('GATT connected');
     
     service = await server.getPrimaryService(SERVICE_UUID);
-    log("SERVICE FOUND\n" + SERVICE_UUID);
+    log('Service found: ' + SERVICE_UUID);
     
-    const characteristics = await service.getCharacteristics();
-    setValue("serviceCount", "1");
-    setValue("characteristicCount", characteristics.length);
-    log("CHARACTERISTICS FOUND\nCount: " + characteristics.length);
+    // Get write characteristic
+    writeChar = await service.getCharacteristic(WRITE_UUID);
+    log('Write characteristic ready');
     
-    // Setup notifications
-    notifyCharacteristic = await service.getCharacteristic(NOTIFY_UUID);
-    log("NOTIFY CHARACTERISTIC FOUND\n" + NOTIFY_UUID);
+    // Get notify characteristic and set up listener
+    notifyChar = await service.getCharacteristic(NOTIFY_UUID);
+    await notifyChar.startNotifications();
+    notifyChar.addEventListener('characteristicvaluechanged', handleNotification);
+    log('Notifications started');
     
-    notifyCharacteristic.addEventListener("characteristicvaluechanged", handleNotification);
-    await notifyCharacteristic.startNotifications();
-    setValue("notificationStatus", "Active", "green");
-    log("NOTIFICATIONS ACTIVE\nListening for scooter data...");
+    // Set up disconnect listener
+    device.addEventListener('gattserverdisconnected', onDisconnected);
     
-    // Setup write characteristic
-    writeCharacteristic = await service.getCharacteristic(WRITE_UUID);
-    log("WRITE CHARACTERISTIC FOUND\n" + WRITE_UUID + "\n\nReady to send lock/unlock commands!");
+    // Update UI
+    isConnected = true;
+    setStatus('Connected', 'connected');
+    document.getElementById('connectBtn').classList.add('hidden');
+    document.getElementById('disconnectBtn').classList.remove('hidden');
+    setButtonsEnabled(true);
+    setLockState(null, 'Ready - send lock/unlock commands');
     
-    // Add disconnect event listener
-    device.addEventListener("gattserverdisconnected", handleDisconnect);
+    log('✓ Ready to send commands');
     
-  } catch(error) {
-    console.error(error);
-    setStatus("Connection failed", "error");
-    setValue("gattStatus", "Failed", "red");
-    log("ERROR\n\n" + (error?.name || "Unknown error") + "\n" + (error?.message || String(error)));
-    updateLockButtons(false);
+  } catch (err) {
+    console.error(err);
+    log('ERROR: ' + err.message);
+    setStatus('Connection failed', 'error');
   }
 }
 
-/*
-==================================================
-DISCONNECT
-==================================================
-*/
-
-function disconnectScooter() {
-  try {
-    if (notifyCharacteristic && device && device.gatt && device.gatt.connected) {
-      notifyCharacteristic.stopNotifications().catch(() => {});
-    }
-  } catch {}
-  
-  if (device && device.gatt && device.gatt.connected) {
+function disconnect() {
+  if (device && device.gatt.connected) {
     device.gatt.disconnect();
   } else {
-    handleDisconnect();
+    onDisconnected();
   }
 }
 
-function handleDisconnect() {
-  setStatus("Disconnected", "error");
-  setValue("bluetoothStatus", "Offline");
-  setValue("gattStatus", "Offline");
-  setValue("notificationStatus", "Off");
-  
-  document.getElementById("connectButton").classList.remove("hidden");
-  document.getElementById("disconnectButton").classList.add("hidden");
-  document.getElementById("liveData").textContent = "Waiting for notifications...";
-  
-  setLockState(null, "Disconnected");
-  updateLockButtons(false);
-  
-  log("SCOOTER DISCONNECTED");
-  
-  notifyCharacteristic = null;
-  writeCharacteristic = null;
+function onDisconnected() {
+  isConnected = false;
+  setStatus('Disconnected', 'error');
+  document.getElementById('connectBtn').classList.remove('hidden');
+  document.getElementById('disconnectBtn').classList.add('hidden');
+  setButtonsEnabled(false);
+  setLockState(null, 'Disconnected');
+  log('Disconnected from scooter');
+  writeChar = null;
+  notifyChar = null;
   service = null;
   server = null;
 }
 
-/*
-==================================================
-INITIAL STATE
-==================================================
-*/
+function handleNotification(event) {
+  const value = event.target.value;
+  const bytes = new Uint8Array(value.buffer);
+  const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+  
+  log('← Received: ' + hex);
+  
+  // Try to parse lock status from response
+  // Look for 0x70 register in response
+  for (let i = 0; i < bytes.length - 1; i++) {
+    if (bytes[i] === PROTOCOL.REG_LOCK) {
+      const lockVal = bytes[i + 1];
+      if (lockVal === 0x01) {
+        setLockState(true, 'Scooter reports LOCKED');
+      } else if (lockVal === 0x00) {
+        setLockState(false, 'Scooter reports UNLOCKED');
+      }
+      break;
+    }
+  }
+}
 
-setValue("serviceCount", "—");
-setValue("characteristicCount", "—");
-setLockState(null, "Connect to scooter to control lock");
-updateLockButtons(false);
+// ============================================
+// LOCK/UNLOCK COMMANDS
+// ============================================
+
+async function sendLock() {
+  if (!writeChar) {
+    log('ERROR: Not connected');
+    return;
+  }
+  
+  try {
+    const frame = buildLockFrame(true);
+    const hexStr = Array.from(frame).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+    
+    log('→ Sending LOCK command');
+    log('  Frame: ' + hexStr);
+    
+    await writeChar.writeValue(frame);
+    
+    log('✓ Lock command sent');
+    setLockState(true, 'Lock command transmitted');
+    
+  } catch (err) {
+    log('ERROR sending lock: ' + err.message);
+    console.error(err);
+  }
+}
+
+async function sendUnlock() {
+  if (!writeChar) {
+    log('ERROR: Not connected');
+    return;
+  }
+  
+  try {
+    const frame = buildLockFrame(false);
+    const hexStr = Array.from(frame).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+    
+    log('→ Sending UNLOCK command');
+    log('  Frame: ' + hexStr);
+    
+    await writeChar.writeValue(frame);
+    
+    log('✓ Unlock command sent');
+    setLockState(false, 'Unlock command transmitted');
+    
+  } catch (err) {
+    log('ERROR sending unlock: ' + err.message);
+    console.error(err);
+  }
+}
+
+// ============================================
+// INIT
+// ============================================
+
+setButtonsEnabled(false);
 
 </script>
 </body>
