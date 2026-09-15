@@ -195,6 +195,16 @@ pre {
   margin-bottom: 4px;
 }
 .hidden { display: none; }
+select {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  width: 100%;
+}
 </style>
 </head>
 <body>
@@ -239,8 +249,16 @@ pre {
       <div id="lockDetail" class="lock-detail">Connect to control scooter</div>
     </div>
 
+    <div style="margin-bottom: 12px;">
+      <div style="color:#7d8590; font-size:12px; margin-bottom:4px;">Target Board</div>
+      <select id="targetSelect">
+        <option value="0x20">ESC (0x20) - Electronic Speed Controller</option>
+        <option value="0x21">Dashboard (0x21) - Display/BLE Module</option>
+      </select>
+    </div>
+
     <div class="button-group">
-      <button id="unlockBtn" class="success" onclick="sendUnlock()" disabled>
+      <button id="unlockBtn" style="background: #238636;" onclick="sendUnlock()" disabled>
         🔓 Unlock
       </button>
       <button id="lockBtn" class="danger" onclick="sendLock()" disabled>
@@ -301,24 +319,28 @@ pre {
 <script>
 
 // ============================================
-// NINEBOT MAX PROTOCOL CONFIGURATION
+// NORDIC UART SERVICE UUIDs (STANDARD)
 // ============================================
 
-// Nordic UART Service (NUS) - Standard UUIDs used by Ninebot Max
-const SERVICE_UUID = "86531001-43E6-47B7-9CB0-5FC21D4AE340";
-const WRITE_UUID = "86531002-43E6-47B7-9CB0-5FC21D4AE340";
-const NOTIFY_UUID = "86531003-43E6-47B7-9CB0-5FC21D4AE340";
+const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+const WRITE_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+const NOTIFY_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+
+// Alternative UUIDs for some Ryde/Ninebot variants
+const ALT_SERVICE_UUID = "86531001-43e6-47b7-9cb0-5fc21d4ae340";
+const ALT_WRITE_UUID = "86531002-43e6-47b7-9cb0-5fc21d4ae340";
+const ALT_NOTIFY_UUID = "86531003-43e6-47b7-9cb0-5fc21d4ae340";
 
 // Protocol Constants
 const PROTOCOL = {
-  HEADER1: 0x5A,      // Header byte 1
-  HEADER2: 0xA5,      // Header byte 2
-  SOURCE_BT: 0x3E,    // Bluetooth/Phone ID
-  TARGET_ESC: 0x20,   // ESC (Electronic Speed Controller) - main control board
-  TARGET_DASH: 0x21,   // Dashboard/Display
-  CMD_WRITE: 0x03,    // Write command
-  REG_LOCK: 0x70,     // Lock register (write 1 to lock)
-  REG_UNLOCK: 0x71    // Unlock register (write 1 to unlock)
+  HEADER1: 0x5A,
+  HEADER2: 0xA5,
+  SOURCE_BT: 0x3E,
+  TARGET_ESC: 0x20,
+  TARGET_DASH: 0x21,
+  CMD_WRITE: 0x03,
+  // Register 0x70 controls lock state (0=unlock, 1=lock) on most Ninebot Max
+  REG_LOCK: 0x70
 };
 
 // ============================================
@@ -331,6 +353,7 @@ let service = null;
 let writeChar = null;
 let notifyChar = null;
 let isConnected = false;
+let usingAltUUIDs = false;
 
 // ============================================
 // UI HELPERS
@@ -381,77 +404,44 @@ function setButtonsEnabled(enabled) {
 }
 
 // ============================================
-// PROTOCOL FRAME BUILDER (FIXED)
+// PROTOCOL FRAME BUILDER
 // ============================================
 
 function calculateChecksum(data) {
-  /*
-   * Ninebot Protocol Checksum:
-   * Sum bytes from index 2 (length) to end of data (before checksum)
-   * Then XOR with 0xFFFF
-   * 
-   * According to the protocol spec:
-   * wChecksumLE = 0xFFFF xor (16-bit sum of bytes <bLen bSrcAddr bDstAddr bCmd bArg bPayload[]>)
-   */
   let sum = 0;
-  // Sum from index 2 (length byte) to the end of the array (excluding checksum bytes)
+  // Sum from index 2 (length byte) to end of data (before checksum)
   for (let i = 2; i < data.length; i++) {
     sum += data[i] & 0xFF;
   }
-  // XOR with 0xFFFF and return lower 16 bits
   return (0xFFFF ^ sum) & 0xFFFF;
 }
 
-function buildWriteFrame(target, register, value) {
-  /*
-   * Ninebot Protocol Frame Structure:
-   * [0]  = 0x5A (Header 1)
-   * [1]  = 0xA5 (Header 2)
-   * [2]  = LENGTH (payload length: from Source ID to end of Data)
-   * [3]  = Source ID (0x3E = Bluetooth)
-   * [4]  = Target ID (0x20 = ESC, 0x21 = Dashboard)
-   * [5]  = Command (0x03 = Write)
-   * [6]  = Register/Index
-   * [7-8]= Data (2 bytes, little-endian) - for lock/unlock: 0x0001
-   * [9]  = Checksum Low
-   * [10] = Checksum High
-   * 
-   * Total size = 11 bytes for single 16-bit write
-   */
+function buildFrame(target, register, value) {
+  // Frame structure: [5A] [A5] [Len] [Src] [Dst] [Cmd] [Reg] [Data0] [Data1] [CRCL] [CRCH]
+  // Length = 4 + data bytes (Src + Dst + Cmd + Reg + Data)
   
-  const dataBytes = 2;  // S16 (16-bit signed) value
-  const payloadLen = 4 + dataBytes;  // Source + Target + Cmd + Index + Data
+  const dataLen = 2; // 2 bytes for value
+  const payloadLen = 4 + dataLen; // Src + Dst + Cmd + Reg + Data
   
-  const frame = new Uint8Array(7 + payloadLen + 2);  // Header(2) + Len(1) + Payload + CRC(2)
+  const frame = new Uint8Array(3 + payloadLen + 2); // Header + Payload + CRC
   
-  frame[0] = PROTOCOL.HEADER1;           // 0x5A
-  frame[1] = PROTOCOL.HEADER2;           // 0xA5
-  frame[2] = payloadLen;                  // Length of payload (4 + data bytes)
-  frame[3] = PROTOCOL.SOURCE_BT;          // 0x3E - Phone/Bluetooth
-  frame[4] = target;                       // Target board (0x20 = ESC)
-  frame[5] = PROTOCOL.CMD_WRITE;         // 0x03 - Write command
-  frame[6] = register;                     // Register address
+  frame[0] = PROTOCOL.HEADER1;
+  frame[1] = PROTOCOL.HEADER2;
+  frame[2] = payloadLen;
+  frame[3] = PROTOCOL.SOURCE_BT;
+  frame[4] = target;
+  frame[5] = PROTOCOL.CMD_WRITE;
+  frame[6] = register;
   
-  // Data (2 bytes, little-endian) - value 1 for lock/unlock
-  frame[7] = value & 0xFF;               // Low byte
-  frame[8] = (value >> 8) & 0xFF;        // High byte
+  // Value in little-endian
+  frame[7] = value & 0xFF;
+  frame[8] = (value >> 8) & 0xFF;
   
-  // Calculate checksum over bytes [2] through [8] (length through data)
   const crc = calculateChecksum(frame.slice(0, 9));
-  frame[9] = crc & 0xFF;                  // CRC Low
-  frame[10] = (crc >> 8) & 0xFF;          // CRC High
+  frame[9] = crc & 0xFF;
+  frame[10] = (crc >> 8) & 0xFF;
   
   return frame;
-}
-
-function buildLockFrame(lock) {
-  // Lock: Target ESC (0x20), Register 0x70, Value 0x0001
-  // Unlock: Target ESC (0x20), Register 0x71, Value 0x0001
-  if (lock) {
-    return buildWriteFrame(PROTOCOL.TARGET_ESC, PROTOCOL.REG_LOCK, 0x0001);
-  } else {
-    return buildWriteFrame(PROTOCOL.TARGET_ESC, PROTOCOL.REG_UNLOCK, 0x0001);
-  }
 }
 
 // ============================================
@@ -460,7 +450,7 @@ function buildLockFrame(lock) {
 
 async function connect() {
   if (!navigator.bluetooth) {
-    log('ERROR: Web Bluetooth not supported in this browser');
+    log('ERROR: Web Bluetooth not supported. Use Chrome/Edge on Android or Mac.');
     setStatus('Browser unsupported', 'error');
     return;
   }
@@ -469,11 +459,28 @@ async function connect() {
     setStatus('Scanning...', 'pending');
     log('Requesting Bluetooth device...');
     
-    // Look for devices with Nordic UART Service
+    // Try to find scooter by name filter first, then fall back to acceptAllDevices
     device = await navigator.bluetooth.requestDevice({
-  acceptAllDevices: true,
-  optionalServices: [SERVICE_UUID]
-});
+      filters: [
+        { namePrefix: 'Ninebot' },
+        { namePrefix: 'Ninebot_MAX' },
+        { namePrefix: 'Ryde' },
+        { namePrefix: 'MI' },
+        { namePrefix: 'M365' }
+      ],
+      optionalServices: [SERVICE_UUID, ALT_SERVICE_UUID]
+    }).catch(async () => {
+      // If filters don't work, try acceptAllDevices
+      log('No filtered devices found, scanning all...');
+      return await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [SERVICE_UUID, ALT_SERVICE_UUID]
+      });
+    });
+    
+    if (!device) {
+      throw new Error('No device selected');
+    }
     
     log(`Found device: ${device.name || 'Unknown'}`);
     document.getElementById('deviceName').textContent = device.name || 'Unknown';
@@ -484,29 +491,41 @@ async function connect() {
     server = await device.gatt.connect();
     log('GATT connected');
     
-    service = await server.getPrimaryService(SERVICE_UUID);
-    log('Nordic UART Service found');
+    // Try primary UUIDs first
+    try {
+      service = await server.getPrimaryService(SERVICE_UUID);
+      log('Using standard Nordic UART service');
+      usingAltUUIDs = false;
+    } catch (e) {
+      // Try alternative UUIDs
+      try {
+        service = await server.getPrimaryService(ALT_SERVICE_UUID);
+        log('Using alternative service UUID');
+        usingAltUUIDs = true;
+      } catch (e2) {
+        throw new Error('Neither standard nor alternative service UUID found');
+      }
+    }
     
-    // Get write characteristic (RX)
-    writeChar = await service.getCharacteristic(WRITE_UUID);
-    log('Write characteristic ready (RX)');
+    const writeUuid = usingAltUUIDs ? ALT_WRITE_UUID : WRITE_UUID;
+    const notifyUuid = usingAltUUIDs ? ALT_NOTIFY_UUID : NOTIFY_UUID;
     
-    // Get notify characteristic (TX) and set up listener
-    notifyChar = await service.getCharacteristic(NOTIFY_UUID);
+    writeChar = await service.getCharacteristic(writeUuid);
+    log('Write characteristic ready');
+    
+    notifyChar = await service.getCharacteristic(notifyUuid);
     await notifyChar.startNotifications();
     notifyChar.addEventListener('characteristicvaluechanged', handleNotification);
-    log('Notifications started (TX)');
+    log('Notifications started');
     
-    // Set up disconnect listener
     device.addEventListener('gattserverdisconnected', onDisconnected);
     
-    // Update UI
     isConnected = true;
     setStatus('Connected', 'connected');
     document.getElementById('connectBtn').classList.add('hidden');
     document.getElementById('disconnectBtn').classList.remove('hidden');
     setButtonsEnabled(true);
-    setLockState(null, 'Ready - send lock/unlock commands');
+    setLockState(null, 'Ready - select target and send command');
     
     log('✓ Ready to send commands');
     
@@ -537,6 +556,7 @@ function onDisconnected() {
   notifyChar = null;
   service = null;
   server = null;
+  usingAltUUIDs = false;
 }
 
 function handleNotification(event) {
@@ -544,18 +564,15 @@ function handleNotification(event) {
   const bytes = new Uint8Array(value.buffer);
   const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
   
-  log('← Received: ' + hex);
+  log('← RX: ' + hex);
   
-  // Parse response - look for write acknowledgment
-  // Response format: 5A A5 <len> <src> <dst> <cmd> <idx> <data...> <crc>
+  // Parse response
   if (bytes.length >= 7 && bytes[0] === 0x5A && bytes[1] === 0xA5) {
     const cmd = bytes[5];
     const reg = bytes[6];
     
-    // Command 0x05 is read response, 0x04 is write response for some models
-    // Check if this is a response to our lock/unlock command
-    if (reg === PROTOCOL.REG_LOCK || reg === PROTOCOL.REG_UNLOCK) {
-      log('  ✓ Lock/Unlock command acknowledged');
+    if (cmd === 0x04 || cmd === 0x05) {
+      log('  ✓ Command acknowledged by scooter');
     }
   }
 }
@@ -570,20 +587,23 @@ async function sendLock() {
     return;
   }
   
+  const target = parseInt(document.getElementById('targetSelect').value);
+  
   try {
-    const frame = buildLockFrame(true);
+    // Value 1 = Lock
+    const frame = buildFrame(target, PROTOCOL.REG_LOCK, 0x0001);
     const hexStr = Array.from(frame).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
     
-    log('→ Sending LOCK command');
-    log('  Frame: ' + hexStr);
+    log(`→ Sending LOCK to ${target === 0x20 ? 'ESC' : 'Dashboard'}...`);
+    log('  TX: ' + hexStr);
     
     await writeChar.writeValue(frame);
     
-    log('✓ Lock command sent to ESC');
-    setLockState(true, 'Lock command transmitted - scooter should lock');
+    log('✓ Lock command sent');
+    setLockState(true, 'Lock command sent');
     
   } catch (err) {
-    log('ERROR sending lock: ' + err.message);
+    log('ERROR: ' + err.message);
     console.error(err);
   }
 }
@@ -594,20 +614,23 @@ async function sendUnlock() {
     return;
   }
   
+  const target = parseInt(document.getElementById('targetSelect').value);
+  
   try {
-    const frame = buildLockFrame(false);
+    // Value 0 = Unlock
+    const frame = buildFrame(target, PROTOCOL.REG_LOCK, 0x0000);
     const hexStr = Array.from(frame).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
     
-    log('→ Sending UNLOCK command');
-    log('  Frame: ' + hexStr);
+    log(`→ Sending UNLOCK to ${target === 0x20 ? 'ESC' : 'Dashboard'}...`);
+    log('  TX: ' + hexStr);
     
     await writeChar.writeValue(frame);
     
-    log('✓ Unlock command sent to ESC');
-    setLockState(false, 'Unlock command transmitted - scooter should unlock');
+    log('✓ Unlock command sent');
+    setLockState(false, 'Unlock command sent');
     
   } catch (err) {
-    log('ERROR sending unlock: ' + err.message);
+    log('ERROR: ' + err.message);
     console.error(err);
   }
 }
@@ -616,7 +639,7 @@ async function sendUnlock() {
 // INIT
 // ============================================
 
-setButtonsEnabled(false);
+setButtonsEnabled(false();
 
 </script>
 </body>
